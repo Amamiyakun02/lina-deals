@@ -72,7 +72,7 @@ export default function App() {
 
     try {
       // Menghubungi API Agent
-      const response = await fetch("http://localhost:8000/chat_agents", {
+      const response = await fetch("https://myagentic-apps.fastapicloud.dev/chat_agents", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
