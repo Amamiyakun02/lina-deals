@@ -157,7 +157,7 @@ export default function App() {
       const errorMsg: Message = {
         id: Date.now() + 1,
         sender: "ai",
-        text: "Koneksi ke sistem **Aimer Consultant** gagal. Pastikan server backend agent berjalan di `http://localhost:8000/chat_agents`.",
+        text: "Koneksi ke sistem **Aimer Agent** gagal. Coba lagi dalam beberapa saat.",
         timestamp: new Date().toLocaleTimeString("id-ID", {
           hour: "2-digit",
           minute: "2-digit",
