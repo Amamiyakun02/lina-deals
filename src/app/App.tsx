@@ -82,8 +82,8 @@ export default function App() {
 
     try {
       const endpoint = targetMode === "agent"
-        ? "https://myagentic-apps.fastapicloud.dev/agents"
-        : "https://myagentic-apps.fastapicloud.dev/chat"; // Endpoint untuk assistant
+        ? "https://myagentic-apps.fastapicloud.dev/v1/agents/chat"
+        : "https://myagentic-apps.fastapicloud.dev/v1/assistant/chat"; // Endpoint untuk assistant
 
       // Menghubungi API
       const response = await fetch(endpoint, {
