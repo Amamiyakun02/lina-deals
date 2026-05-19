@@ -82,7 +82,7 @@ export default function App() {
 
     try {
       const endpoint = targetMode === "agent"
-        ? "https://myagentic-apps.fastapicloud.dev/v1/agents/chat"
+        ? "https://myagentic-apps.fastapicloud.dev/v1/agent/chat"
         : "https://myagentic-apps.fastapicloud.dev/v1/assistant/chat"; // Endpoint untuk assistant
 
       // Menghubungi API
@@ -94,6 +94,7 @@ export default function App() {
         },
         body: JSON.stringify({
           user_id: "user-aimer-1",
+          session_id: "session-" + Date.now(), // Generate a simple session ID or use an existing one
           messages: [
             {
               role: "user",
