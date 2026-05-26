@@ -49,11 +49,27 @@ export function parseProductsFromResponse(text: string): Product[] {
 }
 
 /**
- * Hapus blok [PRODUCTS:{...}] dari teks agar tidak muncul mentah di chat bubble.
+ * Ekstrak daftar ID produk dari blok [PRODUCTS:id1,id2,id3] jika ada.
+ * Mengembalikan array string ID atau [] jika tidak ada.
+ */
+export function extractProductIdsFromResponse(text: string): string[] {
+  if (!text) return [];
+  const match = text.match(/\[PRODUCTS:([a-zA-Z0-9\s,_-]+)\]/);
+  if (!match) return [];
+  const content = match[1].trim();
+  if (content.startsWith("{")) return []; // Ini format JSON lama
+  return content.split(",").map(id => id.trim()).filter(id => id.length > 0);
+}
+
+/**
+ * Hapus blok [PRODUCTS:{...}] atau [PRODUCTS:id1,id2,id3] dari teks agar tidak muncul mentah di chat bubble.
  */
 export function cleanTextFromProducts(text: string): string {
-  // Gunakan greedy matching untuk mencakup seluruh blok sampai ke penutup aslinya
-  return text.replace(/\[PRODUCTS:\{[\s\S]*\}\]/g, "").trimEnd();
+  // Hapus format JSON lama: [PRODUCTS:{...}]
+  let cleaned = text.replace(/\[PRODUCTS:\{[\s\S]*\}\]/g, "");
+  // Hapus format ID baru: [PRODUCTS:id1,id2,id3]
+  cleaned = cleaned.replace(/\[PRODUCTS:[a-zA-Z0-9\s,_-]+\]/g, "");
+  return cleaned.trimEnd();
 }
 
 export const parseProductsFromText = parseProductsFromResponse; // backward compat alias
@@ -65,6 +81,7 @@ interface Message {
   timestamp: string;
   image?: string;
   products?: Product[];
+  productsLoading?: boolean; // ✨ NEW: skeleton loader status
 }
 
 
@@ -218,17 +235,22 @@ export default function App() {
 
             // Parse produk dari blok [PRODUCTS:...] secara real-time
             const parsedProducts = parseProductsFromResponse(aiText);
+            const isStreamingProducts = aiText.includes("[PRODUCTS:");
             // Bersihkan teks dari blok [PRODUCTS:...] agar tidak muncul mentah
             const cleanText = cleanTextFromProducts(aiText);
 
             modeSetMessages((prev) => {
               const exists = prev.some(msg => msg.id === aiResponseId);
+              const isOldFormatFinished = parsedProducts.length > 0;
+              const isLoading = isStreamingProducts && !isOldFormatFinished;
+
               if (!exists) {
                 return [...prev, {
                   id: aiResponseId,
                   sender: "ai",
                   text: cleanText,
-                  products: parsedProducts.length > 0 ? parsedProducts : undefined,
+                  products: isOldFormatFinished ? parsedProducts : undefined,
+                  productsLoading: isLoading ? true : undefined,
                   timestamp: new Date().toLocaleTimeString("id-ID", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -240,7 +262,8 @@ export default function App() {
                     ? {
                       ...msg,
                       text: cleanText,
-                      products: parsedProducts.length > 0 ? parsedProducts : msg.products,
+                      products: isOldFormatFinished ? parsedProducts : msg.products,
+                      productsLoading: isOldFormatFinished ? false : (isLoading ? true : msg.productsLoading),
                     }
                     : msg
                 );
@@ -253,6 +276,57 @@ export default function App() {
       // Jika proses stream selesai namun tidak ada teks yang berhasil diterima
       if (aiText.trim() === "") {
         setIsLoading(false);
+      } else {
+        // ─── STREAM SELESAI: Pemicu Fetch Batch jika format ID-Only ─────────────────
+        const productIds = extractProductIdsFromResponse(aiText);
+        if (productIds.length > 0) {
+          // Tunjukkan skeleton loader terlebih dahulu
+          modeSetMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === aiResponseId
+                ? { ...msg, productsLoading: true }
+                : msg
+            )
+          );
+
+          try {
+            const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+            const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+            
+            const response = await fetch(`${baseUrl}/v1/products/batch?ids=${productIds.join(",")}`);
+            if (response.ok) {
+              const data = await response.json();
+              if (data.items && Array.isArray(data.items)) {
+                modeSetMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === aiResponseId
+                      ? { ...msg, products: data.items, productsLoading: false }
+                      : msg
+                  )
+                );
+              } else {
+                modeSetMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === aiResponseId
+                      ? { ...msg, productsLoading: false }
+                      : msg
+                  )
+                );
+              }
+            } else {
+              throw new Error("Failed to fetch batch products");
+            }
+          } catch (err) {
+            console.error("Batch fetch error:", err);
+            modeSetMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === aiResponseId
+                  ? { ...msg, productsLoading: false }
+                  : msg
+              )
+            );
+          }
+        }
       }
 
     } catch (error) {
@@ -772,8 +846,53 @@ function ChatMessage({
             {renderMessageContent(message.text)}
           </div>
 
+          {/* Skeleton Loader Carousel */}
+          {message.productsLoading && (
+            <div
+              className="mt-4 flex gap-4 overflow-x-auto pb-4 pt-1 w-full max-w-full"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none"
+              }}
+            >
+              {[1, 2, 3].map((item) => (
+                <div
+                  key={item}
+                  className={`w-[290px] h-[380px] shrink-0 rounded-2xl border p-4 flex flex-col justify-between backdrop-blur-md animate-pulse ${
+                    isAgent
+                      ? "bg-white/40 border-indigo-50/50"
+                      : "bg-slate-900/40 border-emerald-500/10"
+                  }`}
+                >
+                  <div className="flex flex-col gap-3">
+                    {/* Badge Skeleton */}
+                    <div className={`w-16 h-4 rounded-full ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
+                    {/* Image Area Skeleton */}
+                    <div className={`w-full h-[140px] rounded-xl flex items-center justify-center ${isAgent ? "bg-slate-50" : "bg-black/10"}`}>
+                      <div className={`w-20 h-20 rounded-full ${isAgent ? "bg-slate-100" : "bg-slate-800"}`} />
+                    </div>
+                    {/* Rating Skeleton */}
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <div className={`w-3.5 h-3.5 rounded-full ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
+                      <div className={`w-12 h-3 rounded ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
+                    </div>
+                    {/* Name Skeleton */}
+                    <div className={`w-3/4 h-5 rounded ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
+                    {/* Price Skeleton */}
+                    <div className={`w-1/2 h-6 rounded ${isAgent ? "bg-indigo-100/50" : "bg-emerald-900/10"}`} />
+                  </div>
+                  {/* Buttons Skeleton */}
+                  <div className="flex gap-2">
+                    <div className={`flex-1 h-9 rounded-xl ${isAgent ? "bg-slate-100" : "bg-white/5"}`} />
+                    <div className={`flex-1 h-9 rounded-xl ${isAgent ? "bg-indigo-100" : "bg-emerald-900/30"}`} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Product Cards Carousel */}
-          {displayProducts.length > 0 && (
+          {displayProducts.length > 0 && !message.productsLoading && (
             <div
               className="mt-4 flex gap-4 overflow-x-auto pb-4 pt-1 w-full max-w-full"
               style={{
