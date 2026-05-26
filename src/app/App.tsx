@@ -54,11 +54,17 @@ export function parseProductsFromResponse(text: string): Product[] {
  */
 export function extractProductIdsFromResponse(text: string): string[] {
   if (!text) return [];
-  const match = text.match(/\[PRODUCTS:([a-zA-Z0-9\s,_-]+)\]/);
+  // Cocokkan [PRODUCTS: diikuti oleh daftar ID, bisa diakhiri oleh ] atau sampai akhir string (jika terpotong)
+  const match = text.match(/\[PRODUCTS:([\s\S]*?)(?:\]|$)/);
   if (!match) return [];
   const content = match[1].trim();
   if (content.startsWith("{")) return []; // Ini format JSON lama
-  return content.split(",").map(id => id.trim()).filter(id => id.length > 0);
+  
+  // Pecah berdasarkan koma dan ambil hanya ID yang valid (24 karakter heksadesimal yang lengkap)
+  return content
+    .split(",")
+    .map(id => id.trim())
+    .filter(id => /^[a-fA-F0-9]{24}$/i.test(id));
 }
 
 /**
@@ -66,9 +72,9 @@ export function extractProductIdsFromResponse(text: string): string[] {
  */
 export function cleanTextFromProducts(text: string): string {
   // Hapus format JSON lama: [PRODUCTS:{...}]
-  let cleaned = text.replace(/\[PRODUCTS:\{[\s\S]*\}\]/g, "");
-  // Hapus format ID baru: [PRODUCTS:id1,id2,id3]
-  cleaned = cleaned.replace(/\[PRODUCTS:[a-zA-Z0-9\s,_-]+\]/g, "");
+  let cleaned = text.replace(/\[PRODUCTS:\{[\s\S]*?(\}\]|$)/g, "");
+  // Hapus format ID baru: [PRODUCTS:...] (bisa diakhiri oleh ] atau sampai akhir teks jika terpotong)
+  cleaned = cleaned.replace(/\[PRODUCTS:[\s\S]*?(?:\]|$)/g, "");
   return cleaned.trimEnd();
 }
 
