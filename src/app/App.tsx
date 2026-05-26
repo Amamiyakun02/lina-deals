@@ -8,6 +8,7 @@ import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import ProductCard, { Product } from "./components/ui/ProductCard";
 import ProductComparison from "./components/ui/ProductComparison";
+import { cn } from "./components/ui/utils";
 
 // ─── Parse [PRODUCTS:{...}] dari response agent ─────────────────────────────
 
@@ -534,36 +535,36 @@ export default function App() {
       <div className={`relative z-10 w-full max-w-4xl h-screen flex flex-col backdrop-blur-3xl border-x shadow-2xl transition-colors duration-700 ${mode === 'agent' ? 'bg-white/60 border-slate-200/50 shadow-[0_0_40px_rgba(0,0,0,0.05)]' : 'bg-[#0f111a]/80 border-white/[0.05]'}`}>
 
         {/* Header - Aimer Consultant Brand */}
-        <header className={`px-6 py-5 border-b flex items-center justify-between shrink-0 transition-colors duration-700 ${mode === 'agent' ? 'bg-white/50 border-slate-200' : 'bg-black/20 border-white/[0.05]'}`}>
-          <div className="flex items-center gap-4">
-            <div className={`relative flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br ${mode === 'agent' ? 'from-indigo-100 to-purple-50 border-indigo-200 shadow-[0_0_15px_rgba(99,102,241,0.1)]' : 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]'} border overflow-hidden transition-colors duration-500`}>
+        <header className={`px-4 py-3 sm:px-6 sm:py-5 border-b flex items-center justify-between shrink-0 transition-colors duration-700 ${mode === 'agent' ? 'bg-white/50 border-slate-200' : 'bg-black/20 border-white/[0.05]'}`}>
+          <div className="flex items-center gap-2 sm:gap-4">
+            <div className={`relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${mode === 'agent' ? 'from-indigo-100 to-purple-50 border-indigo-200 shadow-[0_0_15px_rgba(99,102,241,0.1)]' : 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]'} border overflow-hidden transition-colors duration-500`}>
               <Avatar className="w-full h-full rounded-none">
                 <AvatarImage src="/images/Luna.png" className="object-cover" />
                 <AvatarFallback className="bg-transparent rounded-none">
-                  <Sparkles className={`w-6 h-6 ${mode === 'agent' ? 'text-indigo-600' : 'text-emerald-400'}`} />
+                  <Sparkles className={`w-5 h-5 sm:w-6 sm:h-6 ${mode === 'agent' ? 'text-indigo-600' : 'text-emerald-400'}`} />
                 </AvatarFallback>
               </Avatar>
             </div>
             <div>
-              <h1 className={`text-xl font-semibold tracking-wide bg-clip-text text-transparent ${mode === 'agent' ? 'bg-gradient-to-r from-slate-800 to-slate-600' : 'bg-gradient-to-r from-white to-white/70'}`}>AIMER FUTURE</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`w-2 h-2 rounded-full ${mode === 'agent' ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'} animate-pulse`} />
-                <span className={`text-xs font-medium tracking-wide uppercase ${mode === 'agent' ? 'text-indigo-600' : 'text-emerald-300/80'}`}>{mode === 'agent' ? 'Agent Online' : 'Assistant Online'}</span>
+              <h1 className={`text-sm sm:text-xl font-bold tracking-wide bg-clip-text text-transparent ${mode === 'agent' ? 'bg-gradient-to-r from-slate-800 to-slate-600' : 'bg-gradient-to-r from-white to-white/70'}`}>AIMER FUTURE</h1>
+              <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
+                <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${mode === 'agent' ? 'bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)]' : 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]'} animate-pulse`} />
+                <span className={`text-[10px] sm:text-xs font-semibold tracking-wide uppercase ${mode === 'agent' ? 'text-indigo-600' : 'text-emerald-300/80'}`}>{mode === 'agent' ? 'Agent Online' : 'Assistant Online'}</span>
               </div>
             </div>
           </div>
 
           {/* Mode Switcher */}
-          <div className={`flex items-center p-1.5 rounded-xl border shadow-inner transition-colors duration-700 ${mode === 'agent' ? 'bg-slate-100/80 border-slate-200' : 'bg-black/40 border-white/10'}`}>
+          <div className={`flex items-center p-1 sm:p-1.5 rounded-xl border shadow-inner transition-colors duration-700 ${mode === 'agent' ? 'bg-slate-100/80 border-slate-200' : 'bg-black/40 border-white/10'}`}>
             <button
               onClick={() => setMode('assistant')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${mode === 'assistant' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]' : (mode === 'agent' ? 'text-slate-500 hover:text-slate-700 border border-transparent' : 'text-slate-400 hover:text-slate-200 border border-transparent')}`}
+              className={`flex items-center gap-1 sm:gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-[11px] sm:text-sm font-medium transition-all duration-300 ${mode === 'assistant' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]' : (mode === 'agent' ? 'text-slate-500 hover:text-slate-700 border border-transparent' : 'text-slate-400 hover:text-slate-200 border border-transparent')}`}
             >
               Assistant
             </button>
             <button
               onClick={() => setMode('agent')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${mode === 'agent' ? 'bg-white text-indigo-600 border border-indigo-200 shadow-sm' : 'text-slate-400 hover:text-slate-200 border border-transparent'}`}
+              className={`flex items-center gap-1 sm:gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg text-[11px] sm:text-sm font-medium transition-all duration-300 ${mode === 'agent' ? 'bg-white text-indigo-600 border border-indigo-200 shadow-sm' : 'text-slate-400 hover:text-slate-200 border border-transparent'}`}
             >
               Agent
             </button>
@@ -572,7 +573,7 @@ export default function App() {
 
         {/* Chat Area */}
         <div
-          className="flex-1 overflow-y-auto px-6 py-8 space-y-8 scroll-smooth"
+          className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-8 space-y-6 sm:space-y-8 scroll-smooth"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {messages.map((message) => (
@@ -653,12 +654,12 @@ export default function App() {
         </div>
 
         {/* Input Area */}
-        <div className={`px-6 pb-3 pt-2 shrink-0 bg-gradient-to-t transition-colors duration-700 ${mode === 'agent' ? 'from-white/80 to-transparent' : 'from-[#0a0b10] to-transparent'}`}>
+        <div className={`px-3 sm:px-6 pb-2 pt-1 sm:pb-3 sm:pt-2 shrink-0 bg-gradient-to-t transition-colors duration-700 ${mode === 'agent' ? 'from-white/80 to-transparent' : 'from-[#0a0b10] to-transparent'}`}>
           <div className="relative group">
             {/* Glow effect behind input */}
             <div className={`absolute -inset-1 bg-gradient-to-r ${mode === 'agent' ? 'from-indigo-200/50 via-purple-200/50 to-indigo-200/50' : 'from-emerald-500/20 via-teal-500/20 to-emerald-500/20'} rounded-[24px] blur-md opacity-70 group-focus-within:opacity-100 transition duration-500`}></div>
 
-            <div className={`relative flex items-center gap-3 backdrop-blur-xl border rounded-[20px] p-2 shadow-2xl transition-all duration-300 ${mode === 'agent' ? 'bg-white/90 border-slate-200 focus-within:border-indigo-400 focus-within:bg-white' : 'bg-[#11131a]/90 border-white/10 focus-within:border-emerald-500/50 focus-within:bg-[#151822]'}`}>
+            <div className={`relative flex items-center gap-1.5 sm:gap-3 backdrop-blur-xl border rounded-[20px] p-1.5 sm:p-2 shadow-2xl transition-all duration-300 ${mode === 'agent' ? 'bg-white/90 border-slate-200 focus-within:border-indigo-400 focus-within:bg-white' : 'bg-[#11131a]/90 border-white/10 focus-within:border-emerald-500/50 focus-within:bg-[#151822]'}`}>
               <input
                 type="file"
                 ref={fileInputRef}
@@ -668,7 +669,7 @@ export default function App() {
               />
               <button
                 onClick={handleFileClick}
-                className={`p-3 rounded-xl transition-colors ${mode === 'agent' ? 'text-slate-400 hover:text-indigo-600 hover:bg-slate-100' : 'text-slate-400 hover:text-emerald-300 hover:bg-white/5'}`}
+                className={`p-2 sm:p-3 rounded-xl transition-colors ${mode === 'agent' ? 'text-slate-400 hover:text-indigo-600 hover:bg-slate-100' : 'text-slate-400 hover:text-emerald-300 hover:bg-white/5'}`}
                 title="Lampirkan File"
               >
                 <Paperclip className="w-5 h-5" />
@@ -679,14 +680,14 @@ export default function App() {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={mode === 'agent' ? "Tanyakan seputar smartphone atau gadget..." : "Ketik pesan Anda di sini..."}
-                className={`flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 text-[15px] px-2 h-12 ${mode === 'agent' ? 'text-slate-800 placeholder:text-slate-400' : 'text-white placeholder:text-slate-500/80'}`}
+                placeholder={mode === 'agent' ? "Tanyakan seputar smartphone..." : "Ketik pesan Anda..."}
+                className={`flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 text-[14px] sm:text-[15px] px-2 h-10 sm:h-12 ${mode === 'agent' ? 'text-slate-800 placeholder:text-slate-400' : 'text-white placeholder:text-slate-500/80'}`}
               />
 
               <button
                 onClick={handleSendMessage}
                 disabled={!inputMessage.trim() || isLoading}
-                className={`p-3.5 rounded-xl flex items-center justify-center transition-all duration-300 ${inputMessage.trim() && !isLoading
+                className={`p-2.5 sm:p-3.5 rounded-xl flex items-center justify-center transition-all duration-300 ${inputMessage.trim() && !isLoading
                   ? (mode === 'agent'
                     ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_20px_rgba(79,70,229,0.5)]"
                     : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_25px_rgba(16,185,129,0.6)]") + " hover:scale-105 active:scale-95"
@@ -732,9 +733,92 @@ function ChatMessage({
       const parts = content.split(/(\*\*.*?\*\*)/g);
       return parts.map((part, i) => {
         if (part.startsWith('**') && part.endsWith('**')) {
-          return <strong key={i} className={`font-semibold ${mode === 'agent' && !isUser ? 'text-slate-900' : 'text-white/95'}`}>{part.slice(2, -2)}</strong>;
+          const boldText = part.slice(2, -2);
+          if (isUser) {
+            return <strong key={i} className="font-extrabold text-white">{boldText}</strong>;
+          }
+          return (
+            <strong 
+              key={i} 
+              className={cn(
+                "font-extrabold tracking-wide px-1.5 py-0.5 rounded mx-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] inline-block",
+                isAgent 
+                  ? "text-indigo-700 bg-indigo-50/70 border border-indigo-100/30" 
+                  : "text-emerald-400 bg-emerald-950/30 border border-emerald-500/10"
+              )}
+            >
+              {boldText}
+            </strong>
+          );
         }
         return part;
+      });
+    };
+
+    const renderTextSegment = (segmentText: string) => {
+      const lines = segmentText.split('\n');
+      return lines.map((line, idx) => {
+        // Cek header (###, ##, #)
+        if (line.trim().startsWith('###') || line.trim().startsWith('##') || line.trim().startsWith('#')) {
+          const title = line.replace(/^#+\s+/, '');
+          return (
+            <div key={idx} className={cn(
+              "flex items-center gap-2 mt-4 mb-2 pb-1 border-b font-extrabold tracking-tight text-[15px] sm:text-base",
+              isAgent && !isUser
+                ? "text-indigo-700 dark:text-indigo-400 border-indigo-100/50" 
+                : "text-emerald-400 border-white/5"
+            )}>
+              <span className={cn("w-1 h-3.5 rounded-full", isAgent && !isUser ? "bg-indigo-600 dark:bg-indigo-400" : "bg-emerald-400")} />
+              {processFormatting(title)}
+            </div>
+          );
+        }
+
+        // Cek bullet list (- atau *)
+        if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+          const content = line.trim().substring(2);
+          const indent = line.search(/\S/);
+          return (
+            <div key={idx} className="flex items-start gap-2.5 my-1 pl-1" style={{ paddingLeft: `${indent * 4 + 4}px` }}>
+              <span className={cn(
+                "w-1.5 h-1.5 rounded-full mt-2 shrink-0 shadow-[0_0_8px_rgba(0,0,0,0.1)]", 
+                isAgent && !isUser ? "bg-indigo-500 dark:bg-indigo-400" : "bg-emerald-400"
+              )} />
+              <span className="leading-relaxed text-sm sm:text-[15px]">{processFormatting(content)}</span>
+            </div>
+          );
+        }
+
+        // Cek numbered list (1. 2. dll)
+        const numMatch = line.trim().match(/^(\d+)\.\s+(.*)$/);
+        if (numMatch) {
+          const num = numMatch[1];
+          const content = numMatch[2];
+          const indent = line.search(/\S/);
+          return (
+            <div key={idx} className="flex items-start gap-2.5 my-2 pl-1" style={{ paddingLeft: `${indent * 4 + 4}px` }}>
+              <span className={cn(
+                "flex items-center justify-center w-[18px] h-[18px] rounded-full text-[9px] font-extrabold mt-0.5 shrink-0 shadow-sm",
+                isAgent && !isUser 
+                  ? "bg-indigo-50 text-indigo-600 border border-indigo-100 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800/30" 
+                  : "bg-emerald-950/40 text-emerald-300 border border-emerald-500/20"
+              )}>
+                {num}
+              </span>
+              <span className="leading-relaxed text-sm sm:text-[15px]">{processFormatting(content)}</span>
+            </div>
+          );
+        }
+
+        // Standard line
+        if (line.trim() === "") {
+          return <div key={idx} className="h-1.5" />;
+        }
+        return (
+          <p key={idx} className="text-sm sm:text-[15px] leading-relaxed mb-1.5 whitespace-pre-wrap">
+            {processFormatting(line)}
+          </p>
+        );
       });
     };
 
@@ -748,9 +832,9 @@ function ChatMessage({
       if (match.index > lastIndex) {
         const textBefore = text.substring(lastIndex, match.index);
         parts.push(
-          <p key={`text-${lastIndex}`} className="text-[15px] leading-relaxed mb-3 whitespace-pre-wrap">
-            {processFormatting(textBefore)}
-          </p>
+          <div key={`text-${lastIndex}`}>
+            {renderTextSegment(textBefore)}
+          </div>
         );
       }
 
@@ -783,36 +867,36 @@ function ChatMessage({
     if (lastIndex < text.length) {
       const textAfter = text.substring(lastIndex);
       parts.push(
-        <p key={`text-${lastIndex}`} className="text-[15px] leading-relaxed whitespace-pre-wrap">
-          {processFormatting(textAfter)}
-        </p>
+        <div key={`text-${lastIndex}`}>
+          {renderTextSegment(textAfter)}
+        </div>
       );
     }
 
-    return parts.length > 0 ? <>{parts}</> : <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{processFormatting(text)}</p>;
+    return parts.length > 0 ? <>{parts}</> : <div className="w-full">{renderTextSegment(text)}</div>;
   };
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`flex gap-4 w-full ${isUser ? "flex-row-reverse" : "flex-row"}`}
+      className={`flex gap-2 sm:gap-4 w-full ${isUser ? "flex-row-reverse" : "flex-row"}`}
     >
       {/* Avatar */}
       <div className="flex-shrink-0 mt-1">
         {isUser ? (
-          <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-lg ${mode === 'agent' ? 'from-slate-100 to-slate-200 border-slate-300' : 'from-slate-700 to-slate-900 border-slate-600/50'}`}>
-            <Avatar className="w-9 h-9 rounded-xl">
+          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-lg ${mode === 'agent' ? 'from-slate-100 to-slate-200 border-slate-300' : 'from-slate-700 to-slate-900 border-slate-600/50'}`}>
+            <Avatar className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl">
               <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" />
-              <AvatarFallback className={`bg-transparent font-medium ${mode === 'agent' ? 'text-slate-600' : 'text-slate-200'}`}>U</AvatarFallback>
+              <AvatarFallback className={`bg-transparent font-medium text-xs sm:text-sm ${mode === 'agent' ? 'text-slate-600' : 'text-slate-200'}`}>U</AvatarFallback>
             </Avatar>
           </div>
         ) : (
-          <div className={`w-10 h-10 rounded-2xl bg-gradient-to-br border flex items-center justify-center overflow-hidden ${mode === 'agent' ? 'from-indigo-50 to-indigo-100/50 border-indigo-200 shadow-sm' : 'from-emerald-900/80 to-slate-900/80 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]'}`}>
+          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br border flex items-center justify-center overflow-hidden ${mode === 'agent' ? 'from-indigo-50 to-indigo-100/50 border-indigo-200 shadow-sm' : 'from-emerald-900/80 to-slate-900/80 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.2)]'}`}>
             <Avatar className="w-full h-full rounded-none">
               <AvatarImage src="/images/Luna.png" className="object-cover" />
               <AvatarFallback className="bg-transparent rounded-none">
-                <Sparkles className={`w-5 h-5 ${mode === 'agent' ? 'text-indigo-600' : 'text-emerald-400'}`} />
+                <Sparkles className={`w-4 h-4 sm:w-5 sm:h-5 ${mode === 'agent' ? 'text-indigo-600' : 'text-emerald-400'}`} />
               </AvatarFallback>
             </Avatar>
           </div>
@@ -820,25 +904,25 @@ function ChatMessage({
       </div>
 
       {/* Message Content */}
-      <div className={`flex flex-col max-w-[80%] ${isUser ? "items-end" : "items-start"}`}>
-        <div className="flex items-center gap-2 mb-1.5 px-1">
+      <div className={`flex flex-col max-w-[88%] sm:max-w-[80%] ${isUser ? "items-end" : "items-start"} min-w-0 w-full`}>
+        <div className="flex items-center gap-2 mb-1 px-1">
           {isUser ? (
             <>
-              <span className={`text-[11px] font-medium ${mode === 'agent' ? 'text-slate-400' : 'text-slate-500'}`}>{message.timestamp}</span>
-              <span className={`text-[13px] font-semibold tracking-wide ${mode === 'agent' ? 'text-slate-700' : 'text-slate-300'}`}>Anda</span>
+              <span className={`text-[10px] sm:text-[11px] font-medium ${mode === 'agent' ? 'text-slate-400' : 'text-slate-500'}`}>{message.timestamp}</span>
+              <span className={`text-xs sm:text-[13px] font-semibold tracking-wide ${mode === 'agent' ? 'text-slate-700' : 'text-slate-300'}`}>Anda</span>
             </>
           ) : (
             <>
-              <span className={`text-[13px] font-semibold tracking-wide ${mode === 'agent' ? 'text-indigo-600' : 'text-emerald-300'}`}>
+              <span className={`text-xs sm:text-[13px] font-semibold tracking-wide ${mode === 'agent' ? 'text-indigo-600' : 'text-emerald-300'}`}>
                 AIMER {mode === 'agent' ? 'AGENT' : 'ASSISTANT'}
               </span>
-              <span className={`text-[11px] font-medium ${mode === 'agent' ? 'text-slate-400' : 'text-slate-500'}`}>{message.timestamp}</span>
+              <span className={`text-[10px] sm:text-[11px] font-medium ${mode === 'agent' ? 'text-slate-400' : 'text-slate-500'}`}>{message.timestamp}</span>
             </>
           )}
         </div>
 
         <div
-          className={`px-5 py-4 rounded-[20px] shadow-xl backdrop-blur-md ${isUser
+          className={`px-3.5 sm:px-5 py-3 sm:py-4 rounded-[16px] sm:rounded-[20px] shadow-xl backdrop-blur-md ${isUser
             ? (mode === 'agent' ? 'rounded-tr-sm bg-indigo-600 text-white shadow-[0_4px_15px_rgba(79,70,229,0.15)]' : 'rounded-tr-sm bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50 text-slate-100')
             : (mode === 'agent' ? 'rounded-tl-sm bg-white border border-indigo-100 text-slate-700 shadow-sm' : 'rounded-tl-sm bg-slate-900/60 border border-emerald-500/20 text-slate-200')
             }`}
@@ -848,75 +932,75 @@ function ChatMessage({
               <img src={message.image} alt="Attachment" className="w-full max-w-sm h-auto object-cover" />
             </div>
           )}
-          <div className={`prose prose-p:leading-relaxed max-w-none ${mode === 'agent' && !isUser ? 'prose-slate text-slate-700' : 'prose-invert text-white/95'}`}>
+          <div className={`prose prose-p:leading-relaxed max-w-none text-sm sm:text-[15px] ${mode === 'agent' && !isUser ? 'prose-slate text-slate-700' : 'prose-invert text-white/95'}`}>
             {renderMessageContent(message.text)}
           </div>
-
-          {/* Skeleton Loader Carousel */}
-          {message.productsLoading && (
-            <div
-              className="mt-4 flex gap-4 overflow-x-auto pb-4 pt-1 w-full max-w-full"
-              style={{
-                scrollbarWidth: "none",
-                msOverflowStyle: "none"
-              }}
-            >
-              {[1, 2, 3].map((item) => (
-                <div
-                  key={item}
-                  className={`w-[290px] h-[380px] shrink-0 rounded-2xl border p-4 flex flex-col justify-between backdrop-blur-md animate-pulse ${
-                    isAgent
-                      ? "bg-white/40 border-indigo-50/50"
-                      : "bg-slate-900/40 border-emerald-500/10"
-                  }`}
-                >
-                  <div className="flex flex-col gap-3">
-                    {/* Badge Skeleton */}
-                    <div className={`w-16 h-4 rounded-full ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
-                    {/* Image Area Skeleton */}
-                    <div className={`w-full h-[140px] rounded-xl flex items-center justify-center ${isAgent ? "bg-slate-50" : "bg-black/10"}`}>
-                      <div className={`w-20 h-20 rounded-full ${isAgent ? "bg-slate-100" : "bg-slate-800"}`} />
-                    </div>
-                    {/* Rating Skeleton */}
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <div className={`w-3.5 h-3.5 rounded-full ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
-                      <div className={`w-12 h-3 rounded ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
-                    </div>
-                    {/* Name Skeleton */}
-                    <div className={`w-3/4 h-5 rounded ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
-                    {/* Price Skeleton */}
-                    <div className={`w-1/2 h-6 rounded ${isAgent ? "bg-indigo-100/50" : "bg-emerald-900/10"}`} />
-                  </div>
-                  {/* Buttons Skeleton */}
-                  <div className="flex gap-2">
-                    <div className={`flex-1 h-9 rounded-xl ${isAgent ? "bg-slate-100" : "bg-white/5"}`} />
-                    <div className={`flex-1 h-9 rounded-xl ${isAgent ? "bg-indigo-100" : "bg-emerald-900/30"}`} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Product Cards Carousel */}
-          {displayProducts.length > 0 && !message.productsLoading && (
-            <div
-              className="mt-4 flex gap-4 overflow-x-auto pb-4 pt-1 w-full max-w-full"
-              style={{
-                scrollbarWidth: "none",
-                msOverflowStyle: "none"
-              }}
-            >
-              {displayProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  mode={mode}
-                  onAction={onAction}
-                />
-              ))}
-            </div>
-          )}
         </div>
+
+        {/* Skeleton Loader Carousel (Rendered OUTSIDE bubble for clean full-width scroll) */}
+        {message.productsLoading && (
+          <div
+            className="mt-4 flex gap-3 sm:gap-4 overflow-x-auto pb-4 pt-1 w-full max-w-full"
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none"
+            }}
+          >
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className={`w-[260px] sm:w-[290px] h-[340px] sm:h-[380px] shrink-0 rounded-2xl border p-4 flex flex-col justify-between backdrop-blur-md animate-pulse ${
+                  isAgent
+                    ? "bg-white/40 border-indigo-50/50"
+                    : "bg-slate-900/40 border-emerald-500/10"
+                }`}
+              >
+                <div className="flex flex-col gap-3">
+                  {/* Badge Skeleton */}
+                  <div className={`w-16 h-4 rounded-full ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
+                  {/* Image Area Skeleton */}
+                  <div className={`w-full h-[120px] sm:h-[140px] rounded-xl flex items-center justify-center ${isAgent ? "bg-slate-50" : "bg-black/10"}`}>
+                    <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full ${isAgent ? "bg-slate-100" : "bg-slate-800"}`} />
+                  </div>
+                  {/* Rating Skeleton */}
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <div className={`w-3.5 h-3.5 rounded-full ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
+                    <div className={`w-12 h-3 rounded ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
+                  </div>
+                  {/* Name Skeleton */}
+                  <div className={`w-3/4 h-5 rounded ${isAgent ? "bg-slate-200" : "bg-slate-800"}`} />
+                  {/* Price Skeleton */}
+                  <div className={`w-1/2 h-6 rounded ${isAgent ? "bg-indigo-100/50" : "bg-emerald-900/10"}`} />
+                </div>
+                {/* Buttons Skeleton */}
+                <div className="flex gap-2">
+                  <div className={`flex-1 h-8 sm:h-9 rounded-xl ${isAgent ? "bg-slate-100" : "bg-white/5"}`} />
+                  <div className={`flex-1 h-8 sm:h-9 rounded-xl ${isAgent ? "bg-indigo-100" : "bg-emerald-900/30"}`} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Product Cards Carousel (Rendered OUTSIDE bubble for clean full-width scroll) */}
+        {displayProducts.length > 0 && !message.productsLoading && (
+          <div
+            className="mt-4 flex gap-3 sm:gap-4 overflow-x-auto pb-4 pt-1 w-full max-w-full"
+            style={{
+              scrollbarWidth: "none",
+              msOverflowStyle: "none"
+            }}
+          >
+            {displayProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                mode={mode}
+                onAction={onAction}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </motion.div>
   );
