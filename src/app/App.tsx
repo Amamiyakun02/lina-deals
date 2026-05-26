@@ -111,7 +111,7 @@ export default function App() {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Action handler for Product Card buttons
@@ -163,6 +163,9 @@ export default function App() {
 
     modeSetMessages((prev) => [...prev, newMessage]);
     setInputMessage("");
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+    }
     setIsLoading(true);
 
     // Keep focus on input
@@ -354,7 +357,7 @@ export default function App() {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -677,13 +680,21 @@ export default function App() {
                 <Paperclip className="w-5 h-5" />
               </button>
 
-              <Input
+              <textarea
                 ref={inputRef}
                 value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
+                onChange={(e) => {
+                  setInputMessage(e.target.value);
+                  // Auto grow/shrink
+                  if (inputRef.current) {
+                    inputRef.current.style.height = "auto";
+                    inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`;
+                  }
+                }}
                 onKeyDown={handleKeyDown}
                 placeholder={mode === 'agent' ? "Tanyakan seputar smartphone..." : "Ketik pesan Anda..."}
-                className={`flex-1 bg-transparent border-none shadow-none focus-visible:ring-0 text-[14px] sm:text-[15px] px-2 h-10 sm:h-12 ${mode === 'agent' ? 'text-slate-800 placeholder:text-slate-400' : 'text-white placeholder:text-slate-500/80'}`}
+                rows={1}
+                className={`flex-1 bg-transparent border-none shadow-none focus-visible:outline-none focus:outline-none focus:ring-0 text-[14px] sm:text-[15px] px-2 py-2 sm:py-3.5 resize-none h-10 sm:h-12 overflow-y-auto no-scrollbar ${mode === 'agent' ? 'text-slate-800 placeholder:text-slate-400' : 'text-white placeholder:text-slate-500/80'}`}
               />
 
               <button
@@ -721,7 +732,7 @@ function ChatMessage({
 }: {
   message: Message;
   mode: "agent" | "assistant";
-  onAction: (action: "check_stock" | "view_specs", product: Product) => void;
+  onAction: (action: "check_stock" | "view_specs" | "booking", product: Product) => void;
 }) {
   const isUser = message.sender === "user";
   const isAgent = mode === "agent";
