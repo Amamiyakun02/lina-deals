@@ -841,7 +841,7 @@ function ChatMessage({
           const title = line.replace(/^#+\s+/, '');
           return (
             <div key={idx} className={cn(
-              "flex items-center gap-2 mt-4 mb-2 pb-1 border-b font-extrabold tracking-tight text-[15px] sm:text-base",
+              "flex items-center gap-2 mt-2 mb-1 pb-0.5 border-b font-extrabold tracking-tight text-[15px] sm:text-base",
               isAgent && !isUser
                 ? "text-indigo-700 dark:text-indigo-400 border-indigo-100/50" 
                 : "text-emerald-400 border-white/5"
@@ -857,12 +857,12 @@ function ChatMessage({
           const content = line.trim().substring(2);
           const indent = line.search(/\S/);
           return (
-            <div key={idx} className="flex items-start gap-2.5 my-1 pl-1" style={{ paddingLeft: `${indent * 4 + 4}px` }}>
+            <div key={idx} className="flex items-start gap-2 my-0.5 pl-1" style={{ paddingLeft: `${indent * 4 + 4}px` }}>
               <span className={cn(
-                "w-1.5 h-1.5 rounded-full mt-2 shrink-0 shadow-[0_0_8px_rgba(0,0,0,0.1)]", 
+                "w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 shadow-[0_0_8px_rgba(0,0,0,0.1)]", 
                 isAgent && !isUser ? "bg-indigo-500 dark:bg-indigo-400" : "bg-emerald-400"
               )} />
-              <span className="leading-relaxed text-sm sm:text-[15px]">{processFormatting(content)}</span>
+              <span className="leading-snug text-sm sm:text-[15px]">{processFormatting(content)}</span>
             </div>
           );
         }
@@ -874,7 +874,7 @@ function ChatMessage({
           const content = numMatch[2];
           const indent = line.search(/\S/);
           return (
-            <div key={idx} className="flex items-start gap-2.5 my-2 pl-1" style={{ paddingLeft: `${indent * 4 + 4}px` }}>
+            <div key={idx} className="flex items-start gap-2 my-1 pl-1" style={{ paddingLeft: `${indent * 4 + 4}px` }}>
               <span className={cn(
                 "flex items-center justify-center w-[18px] h-[18px] rounded-full text-[9px] font-extrabold mt-0.5 shrink-0 shadow-sm",
                 isAgent && !isUser 
@@ -883,17 +883,17 @@ function ChatMessage({
               )}>
                 {num}
               </span>
-              <span className="leading-relaxed text-sm sm:text-[15px]">{processFormatting(content)}</span>
+              <span className="leading-snug text-sm sm:text-[15px]">{processFormatting(content)}</span>
             </div>
           );
         }
 
         // Standard line
         if (line.trim() === "") {
-          return <div key={idx} className="h-1.5" />;
+          return <div key={idx} className="h-0.5" />;
         }
         return (
-          <p key={idx} className="text-sm sm:text-[15px] leading-relaxed mb-1.5 whitespace-pre-wrap">
+          <p key={idx} className="text-sm sm:text-[15px] leading-snug mb-1 whitespace-pre-wrap">
             {processFormatting(line)}
           </p>
         );
