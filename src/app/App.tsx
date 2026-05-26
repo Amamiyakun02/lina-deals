@@ -1,11 +1,62 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Input } from "./components/ui/input";
-import { Send, Paperclip, Loader2, Sparkles } from "lucide-react";
+import { Send, Paperclip, Sparkles } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
+import ProductCard, { Product } from "./components/ui/ProductCard";
+import ProductComparison from "./components/ui/ProductComparison";
+
+// ─── Parse [PRODUCTS:{...}] dari response agent ─────────────────────────────
+
+/**
+ * Ekstrak data produk dari blok [PRODUCTS:{"items":[...]}] yang disisipkan agent.
+ * Mengembalikan array Product[] atau [] jika tidak ada / parse gagal.
+ */
+export function parseProductsFromResponse(text: string): Product[] {
+  if (!text) return [];
+  // Regex: cari [PRODUCTS:{...}] — gunakan greedy matching agar tidak terpotong oleh nested brackets (misal colors)
+  const match = text.match(/\[PRODUCTS:(\{[\s\S]*\})\]/);
+  if (!match) return [];
+  try {
+    const parsed = JSON.parse(match[1]);
+    const items: unknown[] = Array.isArray(parsed.items) ? parsed.items : [];
+    return items.filter(Boolean).map((item: unknown) => {
+      const p = item as Record<string, unknown>;
+      return {
+        id: String(p.id ?? Math.random()),
+        name: String(p.name ?? "Produk"),
+        brand: String(p.brand ?? ""),
+        price: String(p.price ?? "Rp 0"),
+        rating: Number(p.rating ?? 0),
+        reviewsCount: Number(p.reviewsCount ?? 0),
+        specs: {
+          screen: String((p.specs as Record<string, unknown>)?.screen ?? "-"),
+          processor: String((p.specs as Record<string, unknown>)?.processor ?? "-"),
+          camera: String((p.specs as Record<string, unknown>)?.camera ?? "-"),
+          battery: String((p.specs as Record<string, unknown>)?.battery ?? "-"),
+        },
+        tags: Array.isArray(p.tags) ? (p.tags as string[]) : ["Toko Aimer"],
+        image: String(p.image ?? `https://placehold.co/300x300/e2e8f0/475569?text=${encodeURIComponent(String(p.name ?? "Produk")).slice(0, 15)}`),
+        colors: Array.isArray(p.colors) ? (p.colors as { name: string; hex: string }[]) : [{ name: "Default", hex: "#8E8E93" }],
+      } satisfies Product;
+    });
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Hapus blok [PRODUCTS:{...}] dari teks agar tidak muncul mentah di chat bubble.
+ */
+export function cleanTextFromProducts(text: string): string {
+  // Gunakan greedy matching untuk mencakup seluruh blok sampai ke penutup aslinya
+  return text.replace(/\[PRODUCTS:\{[\s\S]*\}\]/g, "").trimEnd();
+}
+
+export const parseProductsFromText = parseProductsFromResponse; // backward compat alias
 
 interface Message {
   id: number;
@@ -13,15 +64,19 @@ interface Message {
   text: string;
   timestamp: string;
   image?: string;
+  products?: Product[];
 }
+
 
 export default function App() {
   const [mode, setMode] = useState<"agent" | "assistant">("agent");
+  const [sessionId] = useState(() => "session-" + Math.random().toString(36).substring(2, 15) + "-" + Date.now());
+
   const [agentMessages, setAgentMessages] = useState<Message[]>([
     {
       id: 1,
       sender: "ai",
-      text: "Selamat datang di **AIMER FUTURE (Agent Mode)**. Saya Luna, agen cerdas yang siap membantu Anda mencari informasi dan rekomendasi smartphone atau gadget dengan kapabilitas agentic.",
+      text: "Halo! Saya Luna, konsultan smartphone toko Aimer. 👋\n\nSaya siap bantu kamu cari gadget terbaik sesuai kebutuhan dan budgetmu! Semua rekomendasi saya selalu berdasarkan produk yang tersedia di toko kita, jadi gak perlu khawatir soal keakuratan datanya ya 😊\n\nMau cari HP apa hari ini?",
       timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
     }
   ]);
@@ -34,6 +89,15 @@ export default function App() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Action handler for Product Card buttons
+  const handleProductAction = (action: "check_stock" | "view_specs", product: Product) => {
+    if (action === "check_stock") {
+      handleSendMessage(`Apakah unit **${product.name}** saat ini ready stock di toko Anda?`);
+    } else if (action === "view_specs") {
+      handleSendMessage(`Bisa tolong berikan rincian spesifikasi lengkap dan kelebihan dari **${product.name}**?`);
+    }
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -81,9 +145,11 @@ export default function App() {
     }, 10);
 
     try {
+      const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
       const endpoint = targetMode === "agent"
-        ? "https://myagentic-apps.fastapicloud.dev/v1/agent/chat"
-        : "https://myagentic-apps.fastapicloud.dev/v1/assistant/chat"; // Endpoint untuk assistant
+        ? `${baseUrl}/v1/agent/chat`
+        : `${baseUrl}/v1/assistant/chat`; // Endpoint untuk assistant
 
       // Menghubungi API
       const response = await fetch(endpoint, {
@@ -94,7 +160,7 @@ export default function App() {
         },
         body: JSON.stringify({
           user_id: "user-aimer-1",
-          session_id: "session-" + Date.now(), // Generate a simple session ID or use an existing one
+          session_id: sessionId, // Use persistent session ID to maintain chat memory
           messages: [
             {
               role: "user",
@@ -108,22 +174,10 @@ export default function App() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      setIsLoading(false); // Sembunyikan loading, mulai proses stream
-
       const reader = response.body?.getReader();
       const decoder = new TextDecoder("utf-8");
 
       const aiResponseId = Date.now() + 1;
-      modeSetMessages((prev) => [...prev, {
-        id: aiResponseId,
-        sender: "ai",
-        text: "",
-        timestamp: new Date().toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      }]);
-
       let aiText = "";
 
       if (reader) {
@@ -149,7 +203,7 @@ export default function App() {
                 } else if (typeof data === 'string') {
                   aiText += data;
                 }
-              } catch (e) {
+              } catch {
                 // Jika JSON.parse gagal, anggap sebagai raw text
                 aiText += dataStr;
               }
@@ -159,11 +213,46 @@ export default function App() {
             }
           }
 
-          // Update state dengan teks yang terakumulasi
-          modeSetMessages(prev => prev.map(msg =>
-            msg.id === aiResponseId ? { ...msg, text: aiText } : msg
-          ));
+          if (aiText.trim() !== "") {
+            setIsLoading(false); // Sembunyikan loading dots setelah teks pertama diterima
+
+            // Parse produk dari blok [PRODUCTS:...] secara real-time
+            const parsedProducts = parseProductsFromResponse(aiText);
+            // Bersihkan teks dari blok [PRODUCTS:...] agar tidak muncul mentah
+            const cleanText = cleanTextFromProducts(aiText);
+
+            modeSetMessages((prev) => {
+              const exists = prev.some(msg => msg.id === aiResponseId);
+              if (!exists) {
+                return [...prev, {
+                  id: aiResponseId,
+                  sender: "ai",
+                  text: cleanText,
+                  products: parsedProducts.length > 0 ? parsedProducts : undefined,
+                  timestamp: new Date().toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                }];
+              } else {
+                return prev.map(msg =>
+                  msg.id === aiResponseId
+                    ? {
+                      ...msg,
+                      text: cleanText,
+                      products: parsedProducts.length > 0 ? parsedProducts : msg.products,
+                    }
+                    : msg
+                );
+              }
+            });
+          }
         }
+      }
+
+      // Jika proses stream selesai namun tidak ada teks yang berhasil diterima
+      if (aiText.trim() === "") {
+        setIsLoading(false);
       }
 
     } catch (error) {
@@ -407,7 +496,12 @@ export default function App() {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
         >
           {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} mode={mode} />
+            <ChatMessage
+              key={message.id}
+              message={message}
+              mode={mode}
+              onAction={handleProductAction}
+            />
           ))}
 
           {mode === 'agent' && messages.length === 1 && !isLoading && (
@@ -479,7 +573,7 @@ export default function App() {
         </div>
 
         {/* Input Area */}
-        <div className={`p-6 pt-2 shrink-0 bg-gradient-to-t transition-colors duration-700 ${mode === 'agent' ? 'from-white/80 to-transparent' : 'from-[#0a0b10] to-transparent'}`}>
+        <div className={`px-6 pb-3 pt-2 shrink-0 bg-gradient-to-t transition-colors duration-700 ${mode === 'agent' ? 'from-white/80 to-transparent' : 'from-[#0a0b10] to-transparent'}`}>
           <div className="relative group">
             {/* Glow effect behind input */}
             <div className={`absolute -inset-1 bg-gradient-to-r ${mode === 'agent' ? 'from-indigo-200/50 via-purple-200/50 to-indigo-200/50' : 'from-emerald-500/20 via-teal-500/20 to-emerald-500/20'} rounded-[24px] blur-md opacity-70 group-focus-within:opacity-100 transition duration-500`}></div>
@@ -523,7 +617,7 @@ export default function App() {
               </button>
             </div>
 
-            <div className="text-center mt-3">
+            <div className="text-center mt-4">
               <span className="text-[11px] text-slate-500/70 font-medium tracking-wide">
                 Sistem AI dapat melakukan kesalahan. Harap verifikasi informasi penting secara mandiri.
               </span>
@@ -531,12 +625,26 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* Product Comparison Drawer Removed (Not online store context) */}
     </div>
   );
 }
 
-function ChatMessage({ message, mode }: { message: Message, mode: "agent" | "assistant" }) {
+function ChatMessage({
+  message,
+  mode,
+  onAction
+}: {
+  message: Message;
+  mode: "agent" | "assistant";
+  onAction: (action: "check_stock" | "view_specs", product: Product) => void;
+}) {
   const isUser = message.sender === "user";
+  const isAgent = mode === "agent";
+
+  // Produk berasal dari field products yang di-parse saat streaming
+  const displayProducts: Product[] = message.products ?? [];
 
   const renderMessageContent = (text: string): ReactNode => {
     // Parse bold text for simpler markdown support
@@ -663,6 +771,26 @@ function ChatMessage({ message, mode }: { message: Message, mode: "agent" | "ass
           <div className={`prose prose-p:leading-relaxed max-w-none ${mode === 'agent' && !isUser ? 'prose-slate text-slate-700' : 'prose-invert text-white/95'}`}>
             {renderMessageContent(message.text)}
           </div>
+
+          {/* Product Cards Carousel */}
+          {displayProducts.length > 0 && (
+            <div
+              className="mt-4 flex gap-4 overflow-x-auto pb-4 pt-1 w-full max-w-full"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none"
+              }}
+            >
+              {displayProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  mode={mode}
+                  onAction={onAction}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </motion.div>
