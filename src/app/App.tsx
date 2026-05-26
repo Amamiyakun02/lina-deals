@@ -92,9 +92,66 @@ interface Message {
 }
 
 
+// ─── Tipe untuk Quick Prompt dari API ─────────────────────────────────────────
+interface QuickPrompt {
+  id: string;
+  icon: string;
+  title: string;
+  description: string;
+  prompt: string;
+  color: string;
+}
+
+// Map color name → Tailwind gradient classes (agent & assistant mode)
+const PROMPT_COLORS: Record<string, { agent: string; assistant: string; icon: string }> = {
+  indigo:  { agent: "from-indigo-50 to-indigo-100/50 hover:from-indigo-100 hover:to-indigo-200/50 border-indigo-200 hover:border-indigo-300",   assistant: "from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border-indigo-500/20 hover:border-indigo-500/40",   icon: "agent:bg-indigo-200/50 agent:text-indigo-700 assistant:bg-indigo-500/20 assistant:text-indigo-300" },
+  emerald: { agent: "from-emerald-50 to-emerald-100/50 hover:from-emerald-100 hover:to-emerald-200/50 border-emerald-200 hover:border-emerald-300", assistant: "from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border-emerald-500/20 hover:border-emerald-500/40", icon: "agent:bg-emerald-200/50 agent:text-emerald-700 assistant:bg-emerald-500/20 assistant:text-emerald-300" },
+  violet:  { agent: "from-violet-50 to-violet-100/50 hover:from-violet-100 hover:to-violet-200/50 border-violet-200 hover:border-violet-300",   assistant: "from-violet-500/10 to-purple-500/10 hover:from-violet-500/20 hover:to-purple-500/20 border-violet-500/20 hover:border-violet-500/40",   icon: "agent:bg-violet-200/50 agent:text-violet-700 assistant:bg-violet-500/20 assistant:text-violet-300" },
+  rose:    { agent: "from-rose-50 to-rose-100/50 hover:from-rose-100 hover:to-rose-200/50 border-rose-200 hover:border-rose-300",             assistant: "from-rose-500/10 to-pink-500/10 hover:from-rose-500/20 hover:to-pink-500/20 border-rose-500/20 hover:border-rose-500/40",         icon: "agent:bg-rose-200/50 agent:text-rose-700 assistant:bg-rose-500/20 assistant:text-rose-300" },
+  blue:    { agent: "from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-200/50 border-blue-200 hover:border-blue-300",             assistant: "from-blue-500/10 to-sky-500/10 hover:from-blue-500/20 hover:to-sky-500/20 border-blue-500/20 hover:border-blue-500/40",         icon: "agent:bg-blue-200/50 agent:text-blue-700 assistant:bg-blue-500/20 assistant:text-blue-300" },
+  amber:   { agent: "from-amber-50 to-amber-100/50 hover:from-amber-100 hover:to-amber-200/50 border-amber-200 hover:border-amber-300",       assistant: "from-amber-500/10 to-yellow-500/10 hover:from-amber-500/20 hover:to-yellow-500/20 border-amber-500/20 hover:border-amber-500/40",  icon: "agent:bg-amber-200/50 agent:text-amber-700 assistant:bg-amber-500/20 assistant:text-amber-300" },
+};
+
+const FALLBACK_PROMPTS: QuickPrompt[] = [
+  {
+    id: "gaming",
+    icon: "🎮",
+    title: "Rekomendasi HP Gaming",
+    description: "Cari smartphone performa tinggi untuk gaming budget di bawah 5 juta.",
+    prompt: "Bisa rekomendasikan smartphone untuk gaming dengan budget di bawah 5 juta?",
+    color: "indigo",
+  },
+  {
+    id: "flagship",
+    icon: "⚖️",
+    title: "Bandingkan Flagship",
+    description: "Perbandingan spesifikasi antara iPhone 15 Pro dan Samsung Galaxy S24 Ultra.",
+    prompt: "Apa perbedaan spesifikasi dan keunggulan antara iPhone 15 Pro dengan Samsung Galaxy S24 Ultra?",
+    color: "emerald",
+  },
+];
+
 export default function App() {
   const [mode, setMode] = useState<"agent" | "assistant">("agent");
   const [sessionId] = useState(() => "session-" + Math.random().toString(36).substring(2, 15) + "-" + Date.now());
+
+  // ─── Quick Prompts: fetch dari API ──────────────────────────────────────────
+  const [quickPrompts, setQuickPrompts] = useState<QuickPrompt[]>(FALLBACK_PROMPTS);
+
+  useEffect(() => {
+    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+    fetch(`${baseUrl}/v1/agent/quick-prompts`)
+      .then(res => res.ok ? res.json() : Promise.reject(res.status))
+      .then(data => {
+        if (Array.isArray(data?.prompts) && data.prompts.length > 0) {
+          setQuickPrompts(data.prompts);
+        }
+      })
+      .catch(() => {
+        // Jika gagal, tetap pakai fallback
+      });
+  }, []);
 
   const [agentMessages, setAgentMessages] = useState<Message[]>([
     {
@@ -595,37 +652,45 @@ export default function App() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row gap-3 pt-2"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2"
             >
-              <button
-                onClick={() => handleSendMessage("Bisa rekomendasikan smartphone untuk gaming dengan budget di bawah 5 juta?")}
-                className={`flex-1 text-left px-5 py-4 rounded-2xl bg-gradient-to-br transition-all duration-300 group border ${mode === 'agent' ? 'from-indigo-50 to-indigo-100/50 hover:from-indigo-100 hover:to-indigo-200/50 border-indigo-200 hover:border-indigo-300' : 'from-indigo-500/10 to-purple-500/10 hover:from-indigo-500/20 hover:to-purple-500/20 border-indigo-500/20 hover:border-indigo-500/40'}`}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className={`p-2 rounded-lg group-hover:scale-110 transition-transform ${mode === 'agent' ? 'bg-indigo-200/50 text-indigo-700' : 'bg-indigo-500/20 text-indigo-300'}`}>
-                    🎮
-                  </div>
-                  <span className={`font-semibold text-sm ${mode === 'agent' ? 'text-slate-800' : 'text-slate-200'}`}>Rekomendasi HP Gaming</span>
-                </div>
-                <p className={`text-xs leading-relaxed ${mode === 'agent' ? 'text-slate-600' : 'text-slate-400'}`}>
-                  Cari smartphone performa tinggi untuk gaming budget di bawah 5 juta.
-                </p>
-              </button>
-
-              <button
-                onClick={() => handleSendMessage("Apa perbedaan spesifikasi dan keunggulan antara iPhone 15 Pro dengan Samsung Galaxy S24 Ultra?")}
-                className={`flex-1 text-left px-5 py-4 rounded-2xl bg-gradient-to-br transition-all duration-300 group border ${mode === 'agent' ? 'from-emerald-50 to-emerald-100/50 hover:from-emerald-100 hover:to-emerald-200/50 border-emerald-200 hover:border-emerald-300' : 'from-emerald-500/10 to-teal-500/10 hover:from-emerald-500/20 hover:to-teal-500/20 border-emerald-500/20 hover:border-emerald-500/40'}`}
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className={`p-2 rounded-lg group-hover:scale-110 transition-transform ${mode === 'agent' ? 'bg-emerald-200/50 text-emerald-700' : 'bg-emerald-500/20 text-emerald-300'}`}>
-                    ⚖️
-                  </div>
-                  <span className={`font-semibold text-sm ${mode === 'agent' ? 'text-slate-800' : 'text-slate-200'}`}>Bandingkan Flagship</span>
-                </div>
-                <p className={`text-xs leading-relaxed ${mode === 'agent' ? 'text-slate-600' : 'text-slate-400'}`}>
-                  Perbandingan spesifikasi antara iPhone 15 Pro dan Samsung Galaxy S24 Ultra.
-                </p>
-              </button>
+              {quickPrompts.slice(0, 4).map((qp, idx) => {
+                const colorKey = qp.color in PROMPT_COLORS ? qp.color : "indigo";
+                const colorCls = PROMPT_COLORS[colorKey];
+                // Pilih beberapa warna icon berdasarkan color name + mode
+                const iconBg: Record<string, { agent: string; assistant: string }> = {
+                  indigo:  { agent: "bg-indigo-200/50 text-indigo-700",  assistant: "bg-indigo-500/20 text-indigo-300" },
+                  emerald: { agent: "bg-emerald-200/50 text-emerald-700", assistant: "bg-emerald-500/20 text-emerald-300" },
+                  violet:  { agent: "bg-violet-200/50 text-violet-700",  assistant: "bg-violet-500/20 text-violet-300" },
+                  rose:    { agent: "bg-rose-200/50 text-rose-700",      assistant: "bg-rose-500/20 text-rose-300" },
+                  blue:    { agent: "bg-blue-200/50 text-blue-700",      assistant: "bg-blue-500/20 text-blue-300" },
+                  amber:   { agent: "bg-amber-200/50 text-amber-700",    assistant: "bg-amber-500/20 text-amber-300" },
+                };
+                const iconCls = (iconBg[colorKey] ?? iconBg.indigo)[mode];
+                const cardCls = colorCls[mode];
+                return (
+                  <motion.button
+                    key={qp.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 + idx * 0.08 }}
+                    onClick={() => handleSendMessage(qp.prompt)}
+                    className={`text-left px-5 py-4 rounded-2xl bg-gradient-to-br transition-all duration-300 group border ${cardCls}`}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className={`p-2 rounded-lg group-hover:scale-110 transition-transform ${iconCls}`}>
+                        {qp.icon}
+                      </div>
+                      <span className={`font-semibold text-sm ${mode === 'agent' ? 'text-slate-800' : 'text-slate-200'}`}>
+                        {qp.title}
+                      </span>
+                    </div>
+                    <p className={`text-xs leading-relaxed ${mode === 'agent' ? 'text-slate-600' : 'text-slate-400'}`}>
+                      {qp.description}
+                    </p>
+                  </motion.button>
+                );
+              })}
             </motion.div>
           )}
 
