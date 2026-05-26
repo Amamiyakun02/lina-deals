@@ -25,7 +25,7 @@ export interface Product {
 interface ProductCardProps {
   product: Product;
   mode: "agent" | "assistant";
-  onAction?: (action: "check_stock" | "view_specs", product: Product) => void;
+  onAction?: (action: "check_stock" | "view_specs" | "booking", product: Product) => void;
 }
 
 export default function ProductCard({
@@ -167,31 +167,45 @@ export default function ProductCard({
         </div>
 
         {/* Buttons / Actions */}
-        <div className="flex gap-1.5 sm:gap-2 shrink-0">
-          <button
-            onClick={() => onAction?.("check_stock", product)}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold border transition-all duration-300 bg-white border-slate-200 text-slate-700",
-              isAgent
-                ? "hover:bg-slate-50 hover:border-indigo-200 hover:text-indigo-600"
-                : "bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 hover:border-emerald-500/40 hover:text-emerald-400"
-            )}
-          >
-            <ClipboardCheck className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
-            <span>Tanya Stok</span>
-          </button>
+        <div className="flex flex-col gap-2 shrink-0">
+          <div className="flex gap-1.5 sm:gap-2">
+            <button
+              onClick={() => onAction?.("check_stock", product)}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold border transition-all duration-300 bg-white border-slate-200 text-slate-700",
+                isAgent
+                  ? "hover:bg-slate-50 hover:border-indigo-200 hover:text-indigo-600"
+                  : "bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 hover:border-emerald-500/40 hover:text-emerald-400"
+              )}
+            >
+              <ClipboardCheck className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+              <span>Tanya Stok</span>
+            </button>
+
+            <button
+              onClick={() => onAction?.("view_specs", product)}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold border transition-all duration-300 bg-white border-slate-200 text-slate-700",
+                isAgent
+                  ? "hover:bg-slate-50 hover:border-indigo-200 hover:text-indigo-600"
+                  : "bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 hover:border-emerald-500/40 hover:text-emerald-400"
+              )}
+            >
+              <Info className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
+              <span>Detail</span>
+            </button>
+          </div>
 
           <button
-            onClick={() => onAction?.("view_specs", product)}
+            onClick={() => onAction?.("booking", product)}
             className={cn(
-              "flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold text-white transition-all duration-300 shadow-md",
+              "w-full flex items-center justify-center gap-1.5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold text-white transition-all duration-300 shadow-md",
               isAgent
-                ? "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-200"
-                : "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/50"
+                ? "bg-indigo-600 hover:bg-indigo-500 shadow-indigo-200/50 hover:shadow-indigo-300/50"
+                : "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/50 hover:shadow-emerald-900/50"
             )}
           >
-            <Info className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
-            <span>Spesifikasi</span>
+            <span>🛍️ Booking Sekarang</span>
           </button>
         </div>
       </div>

@@ -115,11 +115,13 @@ export default function App() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Action handler for Product Card buttons
-  const handleProductAction = (action: "check_stock" | "view_specs", product: Product) => {
+  const handleProductAction = (action: "check_stock" | "view_specs" | "booking", product: Product) => {
     if (action === "check_stock") {
       handleSendMessage(`Apakah unit **${product.name}** saat ini ready stock di toko Anda?`);
     } else if (action === "view_specs") {
       handleSendMessage(`Bisa tolong berikan rincian spesifikasi lengkap dan kelebihan dari **${product.name}**?`);
+    } else if (action === "booking") {
+      handleSendMessage(`Bisa tolong booking produk **${product.name}** untuk saya?`);
     }
   };
 
@@ -741,10 +743,10 @@ function ChatMessage({
             <strong 
               key={i} 
               className={cn(
-                "font-extrabold tracking-wide px-1.5 py-0.5 rounded mx-0.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)] inline-block",
+                "font-bold tracking-normal px-1.5 py-0.5 rounded mx-0.5 inline-block border",
                 isAgent 
-                  ? "text-indigo-700 bg-indigo-50/70 border border-indigo-100/30" 
-                  : "text-emerald-400 bg-emerald-950/30 border border-emerald-500/10"
+                  ? "text-indigo-950 bg-indigo-50/30 border-indigo-100/20" 
+                  : "text-emerald-300 bg-emerald-950/40 border-emerald-900/20"
               )}
             >
               {boldText}
