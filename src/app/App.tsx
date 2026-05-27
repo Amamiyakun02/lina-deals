@@ -76,6 +76,8 @@ export function cleanTextFromProducts(text: string): string {
   let cleaned = text.replace(/\[PRODUCTS:\{[\s\S]*?(\}\]|$)/g, "");
   // Hapus format ID baru: [PRODUCTS:...] (bisa diakhiri oleh ] atau sampai akhir teks jika terpotong)
   cleaned = cleaned.replace(/\[PRODUCTS:[\s\S]*?(?:\]|$)/g, "");
+  // Hapus format PENELUSURAN: [PENELUSURAN:...] (bisa diakhiri oleh ] atau sampai akhir teks jika terpotong)
+  cleaned = cleaned.replace(/\[PENELUSURAN:[\s\S]*?(?:\]|$)/g, "");
   return cleaned.trimEnd();
 }
 
@@ -89,6 +91,7 @@ interface Message {
   image?: string;
   products?: Product[];
   productsLoading?: boolean; // ✨ NEW: skeleton loader status
+  rawText?: string; // ✨ NEW: raw response text before cleaning
 }
 
 
@@ -318,6 +321,7 @@ export default function App() {
                   id: aiResponseId,
                   sender: "ai",
                   text: cleanText,
+                  rawText: aiText,
                   products: isOldFormatFinished ? parsedProducts : undefined,
                   productsLoading: isLoading ? true : undefined,
                   timestamp: new Date().toLocaleTimeString("id-ID", {
@@ -331,6 +335,7 @@ export default function App() {
                     ? {
                       ...msg,
                       text: cleanText,
+                      rawText: aiText,
                       products: isOldFormatFinished ? parsedProducts : msg.products,
                       productsLoading: isOldFormatFinished ? false : (isLoading ? true : msg.productsLoading),
                     }
@@ -802,6 +807,32 @@ function ChatMessage({
   const isUser = message.sender === "user";
   const isAgent = mode === "agent";
 
+  const renderSearchingIndicator = () => {
+    if (isUser || !message.rawText) return null;
+    const match = message.rawText.match(/\[PENELUSURAN:\s*(.*?)\]/i);
+    if (!match) return null;
+    const query = match[1].trim();
+    return (
+      <div
+        className={cn(
+          "flex items-center gap-3 px-4 py-2.5 rounded-2xl border mb-3 backdrop-blur-md shadow-sm no-prose",
+          isAgent 
+            ? "bg-indigo-50/50 border-indigo-100/50 text-indigo-950" 
+            : "bg-emerald-950/20 border-emerald-900/30 text-emerald-300"
+        )}
+      >
+        <div className="relative flex items-center justify-center w-5 h-5 shrink-0">
+          <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", isAgent ? "bg-indigo-400" : "bg-emerald-400")} />
+          <span className={cn("relative inline-flex rounded-full h-3.5 w-3.5", isAgent ? "bg-indigo-600" : "bg-emerald-500")} />
+        </div>
+        <div className="flex flex-col min-w-0">
+          <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">Penelusuran Web</span>
+          <span className="text-xs font-semibold truncate leading-tight">Mencari &ldquo;{query}&rdquo; di internet...</span>
+        </div>
+      </div>
+    );
+  };
+
   // Produk berasal dari field products yang di-parse saat streaming
   const displayProducts: Product[] = message.products ?? [];
 
@@ -1011,6 +1042,7 @@ function ChatMessage({
             </div>
           )}
           <div className={`prose prose-p:leading-relaxed max-w-none text-sm sm:text-[15px] ${mode === 'agent' && !isUser ? 'prose-slate text-slate-700' : 'prose-invert text-white/95'}`}>
+            {renderSearchingIndicator()}
             {renderMessageContent(message.text)}
           </div>
         </div>
