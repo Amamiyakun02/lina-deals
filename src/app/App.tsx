@@ -72,11 +72,9 @@ export function extractProductIdsFromResponse(text: string): string[] {
  * Hapus blok [PRODUCTS:{...}] atau [PRODUCTS:id1,id2,id3] dari teks agar tidak muncul mentah di chat bubble.
  */
 export function cleanTextFromProducts(text: string): string {
-  // Hapus format JSON lama: [PRODUCTS:{...}]
-  let cleaned = text.replace(/\[PRODUCTS:\{[\s\S]*?(\}\]|$)/g, "");
-  // Hapus format ID baru: [PRODUCTS:...] (bisa diakhiri oleh ] atau sampai akhir teks jika terpotong)
-  cleaned = cleaned.replace(/\[PRODUCTS:[\s\S]*?(?:\]|$)/g, "");
-  // Hapus format PENELUSURAN: [PENELUSURAN:...] (bisa diakhiri oleh ] atau sampai akhir teks jika terpotong)
+  // Hapus format [PRODUCTS:...] (baik JSON maupun ID-only) secara menyeluruh hingga kurung tutup terakhir
+  let cleaned = text.replace(/\[PRODUCTS:[\s\S]*?(?:\]|$)/g, "");
+  // Hapus format PENELUSURAN: [PENELUSURAN:...]
   cleaned = cleaned.replace(/\[PENELUSURAN:[\s\S]*?(?:\]|$)/g, "");
   return cleaned.trimEnd();
 }
