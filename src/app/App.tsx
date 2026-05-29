@@ -451,20 +451,27 @@ export default function App() {
   return (
     <div className="relative w-screen h-screen flex justify-center overflow-hidden">
       {/* ============================================================
-          Premium Static Mesh Gradient Background (Ultra-optimized)
+          Premium Minimalist Tech Grid Background (Apple/Samsung Style)
       ============================================================ */}
       <div 
-        className="absolute inset-0 overflow-hidden bg-[#f8fafc]"
+        className="absolute inset-0 overflow-hidden bg-gradient-to-b from-[#f8fafc] via-[#f1f5f9] to-[#e2e8f0]"
         style={{
           backgroundImage: `
-            radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-            radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
-            radial-gradient(at 50% 100%, rgba(167, 139, 250, 0.08) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, rgba(244, 114, 182, 0.06) 0px, transparent 50%),
-            radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.06) 0px, transparent 50%)
-          `
+            linear-gradient(rgba(99, 102, 241, 0.015) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(99, 102, 241, 0.015) 1px, transparent 1px)
+          `,
+          backgroundSize: "40px 40px",
+          backgroundPosition: "center top"
         }}
-      />
+      >
+        {/* Soft elegant radial ambient light behind the main container */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(circle at 50% 30%, rgba(99, 102, 241, 0.04) 0%, transparent 70%)"
+          }}
+        />
+      </div>
 
       {/* Main Chat App Container */}
       <div className="relative z-10 w-full max-w-4xl h-screen flex flex-col backdrop-blur-3xl border-x shadow-2xl bg-white/60 border-slate-200/50 shadow-[0_0_40px_rgba(0,0,0,0.05)]">
