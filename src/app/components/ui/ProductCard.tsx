@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "motion/react";
 import { Star, Cpu, Smartphone, Camera, Battery, ClipboardCheck, Info } from "lucide-react";
 import { cn } from "./utils";
+import { translations, type Lang } from "../../../i18n/translations";
 
 export interface Product {
   id: string;
@@ -25,12 +26,14 @@ export interface Product {
 interface ProductCardProps {
   product: Product;
   mode: "agent" | "assistant";
+  lang?: Lang;
   onAction?: (action: "check_stock" | "view_specs" | "booking", product: Product) => void;
 }
 
 export default function ProductCard({
   product,
   mode,
+  lang = "id",
   onAction
 }: ProductCardProps) {
   const [selectedColor, setSelectedColor] = useState(0);
@@ -179,7 +182,7 @@ export default function ProductCard({
               )}
             >
               <ClipboardCheck className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
-              <span>Tanya Stok</span>
+              <span>{translations[lang].checkStockBtn}</span>
             </button>
 
             <button
@@ -192,7 +195,7 @@ export default function ProductCard({
               )}
             >
               <Info className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
-              <span>Detail</span>
+              <span>{translations[lang].detailBtn}</span>
             </button>
           </div>
 
@@ -205,7 +208,7 @@ export default function ProductCard({
                 : "bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/50 hover:shadow-emerald-900/50"
             )}
           >
-            <span>🛍️ Booking Sekarang</span>
+            <span>🛍️ {translations[lang].bookingBtn}</span>
           </button>
         </div>
       </div>

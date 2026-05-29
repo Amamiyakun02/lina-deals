@@ -210,12 +210,13 @@ export default function App() {
 
   // Action handler for Product Card buttons
   const handleProductAction = (action: "check_stock" | "view_specs" | "booking", product: Product) => {
+    const currentT = translations[lang];
     if (action === "check_stock") {
-      handleSendMessage(`Apakah unit **${product.name}** saat ini ready stock di toko Anda?`);
+      handleSendMessage(currentT.checkStockPrompt(product.name));
     } else if (action === "view_specs") {
-      handleSendMessage(`Bisa tolong berikan rincian spesifikasi lengkap dan kelebihan dari **${product.name}**?`);
+      handleSendMessage(currentT.viewSpecsPrompt(product.name));
     } else if (action === "booking") {
-      handleSendMessage(`Bisa tolong booking produk **${product.name}** untuk saya?`);
+      handleSendMessage(currentT.bookingPrompt(product.name));
     }
   };
 
@@ -1038,6 +1039,7 @@ function ChatMessage({
                 key={product.id}
                 product={product}
                 mode="agent"
+                lang={lang}
                 onAction={onAction}
               />
             ))}
