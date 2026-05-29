@@ -52,6 +52,17 @@ export interface Translations {
   checkStockPrompt: (productName: string) => string;
   viewSpecsPrompt: (productName: string) => string;
   bookingPrompt: (productName: string) => string;
+
+  // Help Modal Bilingual
+  helpTitle: string;
+  helpIntro: string;
+  helpClose: string;
+  helpFeatures: {
+    rec: { title: string; desc: string };
+    card: { title: string; desc: string };
+    search: { title: string; desc: string };
+    book: { title: string; desc: string };
+  };
 }
 
 const id: Translations = {
@@ -112,6 +123,29 @@ const id: Translations = {
   checkStockPrompt: (productName) => `Apakah unit **${productName}** saat ini ready stock di toko Anda?`,
   viewSpecsPrompt: (productName) => `Bisa tolong berikan rincian spesifikasi lengkap dan kelebihan dari **${productName}**?`,
   bookingPrompt: (productName) => `Bisa tolong booking produk **${productName}** untuk saya?`,
+
+  // Help Modal Bilingual
+  helpTitle: "Aimer Agent — Panduan Penggunaan",
+  helpIntro: "Halo! Saya Luna, asisten AI Anda. Berikut adalah panduan singkat cara berinteraksi dengan asisten pintar kami:",
+  helpClose: "Mengerti, Tutup Panduan",
+  helpFeatures: {
+    rec: {
+      title: "Konsultasi & Rekomendasi Gadget",
+      desc: "Tanyakan HP terbaik berdasarkan budget, kamera, gaming, atau merek tertentu. Contoh: 'Rekomendasi HP gaming budget 3 juta' atau 'Bandingkan Samsung S24 dengan iPhone 15'."
+    },
+    card: {
+      title: "Kartu Produk Interaktif",
+      desc: "AI akan menampilkan kartu spesifikasi produk interaktif di chat. Cukup klik tombol 'Tanya Stok', 'Detail', atau 'Booking' pada kartu tersebut untuk aksi instan."
+    },
+    search: {
+      title: "Penelusuran Web & Benchmark",
+      desc: "Luna dapat melakukan pencarian data eksternal di internet secara real-time seperti skor Antutu, Geekbench, review ahli, dan menyertakan sitasi sumber terpercaya."
+    },
+    book: {
+      title: "Sistem Booking WhatsApp Otomatis",
+      desc: "Katakan 'Tolong booking Infinix GT 20 Pro'. Cukup sebutkan Nama Lengkap & nomor WhatsApp aktif Anda, maka bukti reservasi dan kode booking akan otomatis terkirim ke WhatsApp Anda!"
+    }
+  }
 };
 
 const en: Translations = {
@@ -172,6 +206,29 @@ const en: Translations = {
   checkStockPrompt: (productName) => `Is the **${productName}** unit currently in stock at your store?`,
   viewSpecsPrompt: (productName) => `Could you please provide the full specifications and advantages of **${productName}**?`,
   bookingPrompt: (productName) => `Could you please book the **${productName}** product for me?`,
+
+  // Help Modal Bilingual
+  helpTitle: "Aimer Agent — Usage Guide",
+  helpIntro: "Hello! I'm Luna, your AI smartphone assistant. Here is a quick guide on how to interact with our smart agent:",
+  helpClose: "Got it, Close Guide",
+  helpFeatures: {
+    rec: {
+      title: "Gadget Consultation & Recommendations",
+      desc: "Ask for the best smartphone based on your budget, camera, gaming needs, or specific brands. Example: 'Gaming phone recommendation budget 3 million' or 'Compare Samsung S24 with iPhone 15'."
+    },
+    card: {
+      title: "Interactive Product Cards",
+      desc: "The AI will display rich product specification cards in the chat. Simply click 'Check Stock', 'Detail', or 'Book Now' on the card for instant actions."
+    },
+    search: {
+      title: "Web Search & Benchmarks",
+      desc: "Luna can search the internet in real-time for external specs, Antutu/Geekbench scores, and expert reviews, along with professional citations."
+    },
+    book: {
+      title: "Automated WhatsApp Booking System",
+      desc: "Say 'Please book Infinix GT 20 Pro'. Once you provide your Full Name & active WhatsApp number, a reservation code and booking receipt will automatically be sent to your WhatsApp!"
+    }
+  }
 };
 
 export const translations: Record<Lang, Translations> = { id, en };

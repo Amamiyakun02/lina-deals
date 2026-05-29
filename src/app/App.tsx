@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
-import { Send, Paperclip, Sparkles, Globe } from "lucide-react";
+import { Send, Paperclip, Sparkles, Globe, HelpCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -151,6 +151,7 @@ export default function App() {
   });
 
   const t = translations[lang];
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const toggleLang = () => {
     const next: Lang = lang === "id" ? "en" : "id";
@@ -501,21 +502,35 @@ export default function App() {
             </div>
           </div>
 
-          {/* Language Toggle */}
-          <button
-            id="lang-toggle-btn"
-            onClick={toggleLang}
-            title="Switch language / Ganti bahasa"
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-100/80 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300 shadow-sm group"
-          >
-            <Globe className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-500 transition-colors" />
-            <span className="text-[11px] sm:text-xs font-bold tracking-widest text-slate-600 group-hover:text-indigo-600 transition-colors uppercase">
-              {lang === "id" ? "ID" : "EN"}
-            </span>
-            <span className="hidden sm:inline text-[10px] text-slate-400 group-hover:text-indigo-400 transition-colors font-medium">
-              → {t.langToggleLabel}
-            </span>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Help / Guide Button */}
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              title="Help / Panduan Penggunaan"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-100/80 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300 shadow-sm group"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-500 transition-colors" />
+              <span className="hidden sm:inline text-[11px] sm:text-xs font-bold text-slate-600 group-hover:text-indigo-600 transition-colors">
+                {lang === "id" ? "Bantuan" : "Help"}
+              </span>
+            </button>
+
+            {/* Language Toggle */}
+            <button
+              id="lang-toggle-btn"
+              onClick={toggleLang}
+              title="Switch language / Ganti bahasa"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-100/80 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300 shadow-sm group"
+            >
+              <Globe className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-500 transition-colors" />
+              <span className="text-[11px] sm:text-xs font-bold tracking-widest text-slate-600 group-hover:text-indigo-600 transition-colors uppercase">
+                {lang === "id" ? "ID" : "EN"}
+              </span>
+              <span className="hidden sm:inline text-[10px] text-slate-400 group-hover:text-indigo-400 transition-colors font-medium">
+                → {t.langToggleLabel}
+              </span>
+            </button>
+          </div>
         </header>
 
         {/* Chat Area */}
@@ -659,6 +674,97 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* ============================================================
+          Premium Help Modal Dialog (Bilingual & Responsive)
+      ============================================================ */}
+      {isHelpOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="relative w-full max-w-2xl max-h-[85vh] flex flex-col bg-white/90 backdrop-blur-xl border border-indigo-100 shadow-2xl rounded-3xl overflow-hidden p-6 sm:p-8"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4 border-b pb-3 border-indigo-50/50">
+              <div className="flex items-center gap-2">
+                <HelpCircle className="w-5.5 h-5.5 text-indigo-600" />
+                <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-800">
+                  {t.helpTitle}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setIsHelpOpen(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors font-bold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Intro */}
+            <p className="text-sm text-slate-600 mb-6 font-medium leading-relaxed">
+              {t.helpIntro}
+            </p>
+
+            {/* Features List */}
+            <div className="flex-1 overflow-y-auto space-y-5 pr-1.5 scrollbar-thin">
+              {/* Rec */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 text-lg">
+                  📱
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-800 mb-0.5">{t.helpFeatures.rec.title}</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{t.helpFeatures.rec.desc}</p>
+                </div>
+              </div>
+
+              {/* Card */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 text-lg">
+                  ⚙️
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-800 mb-0.5">{t.helpFeatures.card.title}</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{t.helpFeatures.card.desc}</p>
+                </div>
+              </div>
+
+              {/* Search */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 text-lg">
+                  🌐
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-800 mb-0.5">{t.helpFeatures.search.title}</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{t.helpFeatures.search.desc}</p>
+                </div>
+              </div>
+
+              {/* Book */}
+              <div className="flex items-start gap-3.5">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 text-lg">
+                  🛍️
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-slate-800 mb-0.5">{t.helpFeatures.book.title}</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{t.helpFeatures.book.desc}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Button */}
+            <div className="mt-6 pt-4 border-t border-indigo-50/50 flex justify-end">
+              <button
+                onClick={() => setIsHelpOpen(false)}
+                className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs sm:text-sm hover:bg-indigo-500 shadow-md shadow-indigo-100 hover:shadow-lg transition-all duration-300"
+              >
+                {t.helpClose}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
