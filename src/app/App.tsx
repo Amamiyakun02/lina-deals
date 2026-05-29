@@ -451,137 +451,20 @@ export default function App() {
   return (
     <div className="relative w-screen h-screen flex justify-center overflow-hidden">
       {/* ============================================================
-          Aurora Animated Background
+          Premium Static Mesh Gradient Background (Ultra-optimized)
       ============================================================ */}
-      <div className="absolute inset-0 overflow-hidden bg-gradient-to-b from-slate-50 via-slate-100/80 to-slate-200/60">
-        <div className="absolute inset-0">
-          {/* Aurora Layer 1 */}
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-              repeating-linear-gradient(
-                90deg,
-                transparent 0px,
-                transparent 10px,
-                rgba(99, 102, 241, 0.05) 10px,
-                rgba(99, 102, 241, 0.15) 12px,
-                rgba(79, 70, 229, 0.2) 15px,
-                rgba(99, 102, 241, 0.15) 18px,
-                rgba(99, 102, 241, 0.05) 20px,
-                transparent 20px,
-                transparent 50px
-              )
-            `,
-              filter: "blur(3px)",
-              transform: "skewY(-10deg)",
-              willChange: "opacity, transform",
-            }}
-            animate={{ x: [-80, 80, -80], opacity: [0.5, 0.75, 0.5] }}
-            transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
-          />
-
-          {/* Aurora Layer 2 */}
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-              repeating-linear-gradient(
-                95deg,
-                transparent 0px,
-                transparent 14px,
-                rgba(168, 85, 247, 0.05) 14px,
-                rgba(168, 85, 247, 0.15) 16px,
-                rgba(147, 51, 234, 0.2) 19px,
-                rgba(168, 85, 247, 0.15) 22px,
-                rgba(168, 85, 247, 0.05) 24px,
-                transparent 24px,
-                transparent 60px
-              )
-            `,
-              filter: "blur(4px)",
-              transform: "skewY(8deg)",
-              willChange: "opacity, transform",
-            }}
-            animate={{ x: [100, -120, 100], opacity: [0.4, 0.65, 0.4] }}
-            transition={{ duration: 34, repeat: Infinity, ease: "easeInOut" }}
-          />
-
-          {/* Aurora Layer 3 */}
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-              repeating-linear-gradient(
-                88deg,
-                transparent 0px,
-                transparent 12px,
-                rgba(56, 189, 248, 0.05) 12px,
-                rgba(56, 189, 248, 0.15) 14px,
-                rgba(2, 132, 199, 0.2) 17px,
-                rgba(56, 189, 248, 0.15) 20px,
-                rgba(56, 189, 248, 0.05) 22px,
-                transparent 22px,
-                transparent 55px
-              )
-            `,
-              filter: "blur(3px)",
-              transform: "skewY(-5deg)",
-              willChange: "opacity, transform",
-            }}
-            animate={{ x: [-60, 110, -60], opacity: [0.45, 0.65, 0.45] }}
-            transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
-          />
-
-          {/* Aurora Layer 4 */}
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-              repeating-linear-gradient(
-                92deg,
-                transparent 0px,
-                transparent 16px,
-                rgba(244, 114, 182, 0.05) 16px,
-                rgba(244, 114, 182, 0.15) 18px,
-                rgba(219, 39, 119, 0.2) 21px,
-                rgba(244, 114, 182, 0.15) 24px,
-                rgba(244, 114, 182, 0.05) 26px,
-                transparent 26px,
-                transparent 65px
-              )
-            `,
-              filter: "blur(4px)",
-              transform: "skewY(12deg)",
-              willChange: "opacity, transform",
-            }}
-            animate={{ x: [70, -90, 70], opacity: [0.4, 0.6, 0.4] }}
-            transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
-          />
-
-          {/* Soft Glow Top */}
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              background: "radial-gradient(ellipse at 50% 15%, rgba(94, 234, 212, 0.12) 0%, transparent 55%)",
-              filter: "blur(90px)",
-            }}
-            animate={{ opacity: [0.3, 0.55, 0.3] }}
-            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-          />
-
-          {/* Soft Glow Bottom */}
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              background: "radial-gradient(ellipse at 50% 85%, rgba(167, 139, 250, 0.14) 0%, transparent 55%)",
-              filter: "blur(100px)",
-            }}
-            animate={{ opacity: [0.2, 0.4, 0.2] }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </div>
-      </div>
+      <div 
+        className="absolute inset-0 overflow-hidden bg-[#f8fafc]"
+        style={{
+          backgroundImage: `
+            radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+            radial-gradient(at 50% 100%, rgba(167, 139, 250, 0.08) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(244, 114, 182, 0.06) 0px, transparent 50%),
+            radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.06) 0px, transparent 50%)
+          `
+        }}
+      />
 
       {/* Main Chat App Container */}
       <div className="relative z-10 w-full max-w-4xl h-screen flex flex-col backdrop-blur-3xl border-x shadow-2xl bg-white/60 border-slate-200/50 shadow-[0_0_40px_rgba(0,0,0,0.05)]">
