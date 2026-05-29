@@ -117,6 +117,28 @@ const ICON_COLORS: Record<string, string> = {
   amber:   "bg-amber-200/50 text-amber-700",
 };
 
+// Build fallback quick prompts based on current language (outside component for stability)
+function buildFallbackPrompts(currentLang: Lang): QuickPrompt[] {
+  return [
+    {
+      id: "gaming",
+      icon: "🎮",
+      title: translations[currentLang].quickPrompts.gaming.title,
+      description: translations[currentLang].quickPrompts.gaming.description,
+      prompt: translations[currentLang].quickPrompts.gaming.prompt,
+      color: "indigo",
+    },
+    {
+      id: "flagship",
+      icon: "⚖️",
+      title: translations[currentLang].quickPrompts.flagship.title,
+      description: translations[currentLang].quickPrompts.flagship.description,
+      prompt: translations[currentLang].quickPrompts.flagship.prompt,
+      color: "emerald",
+    },
+  ];
+}
+
 export default function App() {
   // ─── Language State (persisted in localStorage) ──────────────────────────
   const [lang, setLang] = useState<Lang>(() => {
@@ -139,35 +161,13 @@ export default function App() {
   const [sessionId] = useState(() => "session-" + Math.random().toString(36).substring(2, 15) + "-" + Date.now());
 
   // ─── Quick Prompts: fetch dari API ──────────────────────────────────────────
-  const buildFallbackPrompts = (currentLang: Lang): QuickPrompt[] => [
-    {
-      id: "gaming",
-      icon: "🎮",
-      title: translations[currentLang].quickPrompts.gaming.title,
-      description: translations[currentLang].quickPrompts.gaming.description,
-      prompt: translations[currentLang].quickPrompts.gaming.prompt,
-      color: "indigo",
-    },
-    {
-      id: "flagship",
-      icon: "⚖️",
-      title: translations[currentLang].quickPrompts.flagship.title,
-      description: translations[currentLang].quickPrompts.flagship.description,
-      prompt: translations[currentLang].quickPrompts.flagship.prompt,
-      color: "emerald",
-    },
-  ];
-
   const [quickPrompts, setQuickPrompts] = useState<QuickPrompt[]>(() => buildFallbackPrompts("id"));
 
-  // Sync fallback prompts when lang changes (only if no API prompts loaded)
-  const [apiPromptsLoaded, setApiPromptsLoaded] = useState(false);
+  // Sync fallback prompts when lang changes (always update so language switch is visible)
   useEffect(() => {
-    if (!apiPromptsLoaded) {
-      setQuickPrompts(buildFallbackPrompts(lang));
-    }
+    setQuickPrompts(buildFallbackPrompts(lang));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang, apiPromptsLoaded]);
+  }, [lang]);
 
   useEffect(() => {
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
@@ -177,7 +177,6 @@ export default function App() {
       .then(data => {
         if (Array.isArray(data?.prompts) && data.prompts.length > 0) {
           setQuickPrompts(data.prompts);
-          setApiPromptsLoaded(true);
         }
       })
       .catch(() => {
