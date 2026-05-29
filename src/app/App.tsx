@@ -278,6 +278,7 @@ export default function App() {
         body: JSON.stringify({
           user_id: "user-aimer-1",
           session_id: sessionId,
+          lang: lang,
           messages: [
             {
               role: "user",
