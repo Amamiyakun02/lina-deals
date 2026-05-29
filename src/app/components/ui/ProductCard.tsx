@@ -87,7 +87,7 @@ export default function ProductCard({
           transition={{ duration: 0.3 }}
           src={product.image}
           alt={product.name}
-          className="w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] filter"
+          className="h-[120px] sm:h-[150px] w-auto max-w-[90%] object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] filter"
         />
 
         {/* Color selectors overlay */}

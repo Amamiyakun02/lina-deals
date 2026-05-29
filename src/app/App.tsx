@@ -163,16 +163,14 @@ export default function App() {
   // ─── Quick Prompts: fetch dari API ──────────────────────────────────────────
   const [quickPrompts, setQuickPrompts] = useState<QuickPrompt[]>(() => buildFallbackPrompts("id"));
 
-  // Sync fallback prompts when lang changes (always update so language switch is visible)
+  // Sync quick prompts when language changes
   useEffect(() => {
+    // Immediately set to fallback prompts for optimal UI responsiveness
     setQuickPrompts(buildFallbackPrompts(lang));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang]);
 
-  useEffect(() => {
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
     const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
-    fetch(`${baseUrl}/v1/agent/quick-prompts`)
+    fetch(`${baseUrl}/v1/agent/quick-prompts?lang=${lang}`)
       .then(res => res.ok ? res.json() : Promise.reject(res.status))
       .then(data => {
         if (Array.isArray(data?.prompts) && data.prompts.length > 0) {
@@ -180,9 +178,9 @@ export default function App() {
         }
       })
       .catch(() => {
-        // Jika gagal, tetap pakai fallback
+        // Fallback is already set
       });
-  }, []);
+  }, [lang]);
 
   const buildWelcomeMessage = (currentLang: Lang): Message => ({
     id: 1,
@@ -259,9 +257,12 @@ export default function App() {
     }
     setIsLoading(true);
 
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 10);
+    const isMobile = window.innerWidth < 768 || /Mobi|Android|iPhone/i.test(navigator.userAgent);
+    if (!isMobile) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 10);
+    }
 
     try {
       const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
@@ -758,8 +759,8 @@ export default function App() {
               </button>
             </div>
 
-            <div className="text-center mt-4">
-              <span className="text-[11px] text-slate-500/70 font-medium tracking-wide">
+            <div className="text-center mt-1.5 sm:mt-3.5">
+              <span className="text-[10px] sm:text-[11px] text-slate-500/70 font-medium tracking-wide leading-tight sm:leading-normal">
                 {t.disclaimer}
               </span>
             </div>
