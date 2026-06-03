@@ -5,7 +5,7 @@ export interface Translations {
   agentOnline: string;
   brandName: string;
 
-  // Welcome message (Luna)
+  // Welcome message (Lina)
   welcomeMessage: string;
 
   // Input
@@ -63,6 +63,37 @@ export interface Translations {
     search: { title: string; desc: string };
     book: { title: string; desc: string };
   };
+  loginBtn: string;
+  registerBtn: string;
+  logoutBtn: string;
+  loginTitle: string;
+  registerTitle: string;
+  emailLabel: string;
+  passwordLabel: string;
+  nameLabel: string;
+  phoneLabel: string;
+  submitLogin: string;
+  submitRegister: string;
+  switchToRegister: string;
+  switchToLogin: string;
+  authSuccessMessage: string;
+  registerSuccessMessage: string;
+  orDivider: string;
+  landing: {
+    slogan: string;
+    subSlogan: string;
+    description: string;
+    startBtn: string;
+    featuresTitle: string;
+    feature1Title: string;
+    feature1Desc: string;
+    feature2Title: string;
+    feature2Desc: string;
+    feature3Title: string;
+    feature3Desc: string;
+    quickStartTitle: string;
+    resetLandingBtn: string;
+  };
 }
 
 const id: Translations = {
@@ -72,7 +103,7 @@ const id: Translations = {
 
   // Welcome message
   welcomeMessage:
-    "Halo! Saya Luna, konsultan smartphone toko Aimer. 👋\n\nSaya siap bantu kamu cari gadget terbaik sesuai kebutuhan dan budgetmu! Semua rekomendasi saya selalu berdasarkan produk yang tersedia di toko kita, jadi gak perlu khawatir soal keakuratan datanya ya 😊\n\nMau cari HP apa hari ini?",
+    "Halo! Lina di sini, konsultan smartphone toko Aimer. 👋\n\nLina siap bantu kamu cari gadget terbaik sesuai kebutuhan dan budgetmu! Semua rekomendasi lina selalu berdasarkan produk yang tersedia di toko kita, jadi gak perlu khawatir soal keakuratan datanya ya 😊\n\nMau cari HP apa hari ini?",
 
   // Input
   inputPlaceholder: "Tanyakan seputar smartphone...",
@@ -126,7 +157,7 @@ const id: Translations = {
 
   // Help Modal Bilingual
   helpTitle: "Aimer Agent — Panduan Penggunaan",
-  helpIntro: "Halo! Saya Luna, asisten AI Anda. Berikut adalah panduan singkat cara berinteraksi dengan asisten pintar kami:",
+  helpIntro: "Halo! Lina di sini, asisten AI Anda. Berikut adalah panduan singkat cara berinteraksi dengan asisten pintar kami:",
   helpClose: "Mengerti, Tutup Panduan",
   helpFeatures: {
     rec: {
@@ -139,12 +170,43 @@ const id: Translations = {
     },
     search: {
       title: "Penelusuran Web & Benchmark",
-      desc: "Luna dapat melakukan pencarian data eksternal di internet secara real-time seperti skor Antutu, Geekbench, review ahli, dan menyertakan sitasi sumber terpercaya."
+      desc: "Lina dapat melakukan pencarian data eksternal di internet secara real-time seperti skor Antutu, Geekbench, review ahli, dan menyertakan sitasi sumber terpercaya."
     },
     book: {
       title: "Sistem Booking WhatsApp Otomatis",
       desc: "Katakan 'Tolong booking Infinix GT 20 Pro'. Cukup sebutkan Nama Lengkap & nomor WhatsApp aktif Anda, maka bukti reservasi dan kode booking akan otomatis terkirim ke WhatsApp Anda!"
     }
+  },
+  loginBtn: "Masuk",
+  registerBtn: "Daftar",
+  logoutBtn: "Keluar",
+  loginTitle: "Masuk ke Aimer Future",
+  registerTitle: "Daftar Akun Member",
+  emailLabel: "Alamat Email",
+  passwordLabel: "Kata Sandi",
+  nameLabel: "Nama Lengkap",
+  phoneLabel: "Nomor WhatsApp",
+  submitLogin: "Masuk Sekarang",
+  submitRegister: "Daftar & Aktivasi",
+  switchToRegister: "Belum punya akun? Daftar gratis di sini",
+  switchToLogin: "Sudah punya akun? Masuk di sini",
+  authSuccessMessage: "Berhasil masuk! Selamat datang kembali.",
+  registerSuccessMessage: "Registrasi sukses! Akun Anda aktif.",
+  orDivider: "atau",
+  landing: {
+    slogan: "Cerdas. Personal. Instan.",
+    subSlogan: "Asisten Gadget AI Terbaik untuk Anda",
+    description: "Temukan smartphone impian Anda bersama Lina. Dapatkan rekomendasi akurat, cek ketersediaan stok real-time, dan lakukan pemesanan otomatis lewat WhatsApp.",
+    startBtn: "Mulai Konsultasi",
+    featuresTitle: "Mengapa Memilih Asisten Aimer?",
+    feature1Title: "Konsultasi Cerdas",
+    feature1Desc: "Rekomendasi HP terbaik sesuai budget, spesifikasi, dan kebutuhan Anda secara akurat.",
+    feature2Title: "Cek Stok Real-Time",
+    feature2Desc: "Informasi ketersediaan unit langsung dari database toko kami secara instan.",
+    feature3Title: "Booking WhatsApp",
+    feature3Desc: "Reservasi produk secara otomatis dengan konfirmasi langsung ke nomor WhatsApp Anda.",
+    quickStartTitle: "Atau Mulai dengan Topik Berikut:",
+    resetLandingBtn: "Panduan Awal"
   }
 };
 
@@ -155,7 +217,7 @@ const en: Translations = {
 
   // Welcome message
   welcomeMessage:
-    "Hello! I'm Luna, Aimer store's smartphone consultant. 👋\n\nI'm ready to help you find the best gadget that fits your needs and budget! All my recommendations are always based on products available in our store, so no need to worry about data accuracy 😊\n\nWhat phone are you looking for today?",
+    "Hello! Lina is here, Aimer store's smartphone consultant. 👋\n\nLina is ready to help you find the best gadget that fits your needs and budget! All recommendations from lina are always based on products available in our store, so no need to worry about data accuracy 😊\n\nWhat phone are you looking for today?",
 
   // Input
   inputPlaceholder: "Ask about smartphones...",
@@ -209,7 +271,7 @@ const en: Translations = {
 
   // Help Modal Bilingual
   helpTitle: "Aimer Agent — Usage Guide",
-  helpIntro: "Hello! I'm Luna, your AI smartphone assistant. Here is a quick guide on how to interact with our smart agent:",
+  helpIntro: "Hello! Lina is here, your AI smartphone assistant. Here is a quick guide on how to interact with our smart agent:",
   helpClose: "Got it, Close Guide",
   helpFeatures: {
     rec: {
@@ -222,12 +284,43 @@ const en: Translations = {
     },
     search: {
       title: "Web Search & Benchmarks",
-      desc: "Luna can search the internet in real-time for external specs, Antutu/Geekbench scores, and expert reviews, along with professional citations."
+      desc: "Lina can search the internet in real-time for external specs, Antutu/Geekbench scores, and expert reviews, along with professional citations."
     },
     book: {
       title: "Automated WhatsApp Booking System",
       desc: "Say 'Please book Infinix GT 20 Pro'. Once you provide your Full Name & active WhatsApp number, a reservation code and booking receipt will automatically be sent to your WhatsApp!"
     }
+  },
+  loginBtn: "Sign In",
+  registerBtn: "Sign Up",
+  logoutBtn: "Sign Out",
+  loginTitle: "Sign In to Aimer Future",
+  registerTitle: "Register Member Account",
+  emailLabel: "Email Address",
+  passwordLabel: "Password",
+  nameLabel: "Full Name",
+  phoneLabel: "WhatsApp Number",
+  submitLogin: "Sign In Now",
+  submitRegister: "Register & Activate",
+  switchToRegister: "Don't have an account? Sign up free here",
+  switchToLogin: "Already have an account? Sign in here",
+  authSuccessMessage: "Successfully signed in! Welcome back.",
+  registerSuccessMessage: "Registration successful! Account is active.",
+  orDivider: "or",
+  landing: {
+    slogan: "Smart. Personal. Instant.",
+    subSlogan: "Your Ultimate AI Gadget Companion",
+    description: "Find your dream smartphone with Lina. Get accurate recommendations, check real-time stock availability, and reserve devices instantly through WhatsApp.",
+    startBtn: "Start Consultation",
+    featuresTitle: "Why Choose Aimer Assistant?",
+    feature1Title: "Intelligent Consultation",
+    feature1Desc: "Accurate phone recommendations tailored to your budget, specs, and specific needs.",
+    feature2Title: "Real-Time Stock Check",
+    feature2Desc: "Instant information on product availability directly from our store database.",
+    feature3Title: "WhatsApp Booking",
+    feature3Desc: "Automatically reserve products with instant confirmation sent to your WhatsApp.",
+    quickStartTitle: "Or Start with These Topics:",
+    resetLandingBtn: "Intro Guide"
   }
 };
 

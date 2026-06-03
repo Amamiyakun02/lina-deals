@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
-import { Send, Paperclip, Sparkles, Globe, HelpCircle } from "lucide-react";
+import { Send, Paperclip, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -8,6 +8,8 @@ import type { ReactNode } from "react";
 import ProductCard, { Product } from "./components/ui/ProductCard";
 import { cn } from "./components/ui/utils";
 import { translations, type Lang } from "../i18n/translations";
+import { auth, googleProvider } from "./utils/firebase";
+import { signInWithPopup } from "firebase/auth";
 
 // ─── Parse [PRODUCTS:{...}] dari response agent ─────────────────────────────
 
@@ -152,6 +154,21 @@ export default function App() {
 
   const t = translations[lang];
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isLandingOpen, setIsLandingOpen] = useState<boolean>(() => {
+    try {
+      const saved = sessionStorage.getItem("aimer-landing-dismissed");
+      return saved !== "true";
+    } catch {
+      return true;
+    }
+  });
+
+  const dismissLanding = () => {
+    setIsLandingOpen(false);
+    try {
+      sessionStorage.setItem("aimer-landing-dismissed", "true");
+    } catch { /* noop */ }
+  };
 
   const toggleLang = () => {
     const next: Lang = lang === "id" ? "en" : "id";
@@ -160,6 +177,249 @@ export default function App() {
   };
 
   const [sessionId] = useState(() => "session-" + Math.random().toString(36).substring(2, 15) + "-" + Date.now());
+
+  // ─── Guest & Logged In User State ───────────────────────────────────────
+  const [guestUserId] = useState(() => {
+    try {
+      let id = localStorage.getItem("aimer-guest-user-id");
+      if (!id) {
+        id = "guest-" + Math.random().toString(36).substring(2, 11) + "-" + Date.now();
+        localStorage.setItem("aimer-guest-user-id", id);
+      }
+      return id;
+    } catch {
+      return "guest-fallback-" + Date.now();
+    }
+  });
+
+  interface UserProfile {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    role: string;
+    avatar_url?: string;
+  }
+
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    try {
+      const saved = localStorage.getItem("aimer-user-profile");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  // ─── Auth Modal State ───────────────────────────────────────────────────
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authName, setAuthName] = useState("");
+  const [authPhone, setAuthPhone] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // ─── Complete Profile Modal State ───────────────────────────────────────
+  const [isCompleteProfileOpen, setIsCompleteProfileOpen] = useState(false);
+  const [completeName, setCompleteName] = useState("");
+  const [completePhone, setCompletePhone] = useState("");
+  const [completeProfileError, setCompleteProfileError] = useState("");
+  const [completeProfileLoading, setCompleteProfileLoading] = useState(false);
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError("");
+    setAuthLoading(true);
+
+    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+    const endpoint = authMode === "login" ? `${baseUrl}/v1/auth/login` : `${baseUrl}/v1/auth/register`;
+
+    try {
+      const body = authMode === "login" 
+        ? { email: authEmail, password: authPassword }
+        : { name: authName, email: authEmail, phone: authPhone, password: authPassword };
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Authentication failed");
+      }
+
+      // Success
+      const loggedUser = data.user;
+      const token = data.access_token;
+      setUser(loggedUser);
+      localStorage.setItem("aimer-user-profile", JSON.stringify(loggedUser));
+      if (token) {
+        localStorage.setItem("aimer-auth-token", token);
+      }
+
+      // Trigger session migration
+      try {
+        await fetch(`${baseUrl}/v1/auth/migrate-session`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            temp_session_id: sessionId,
+            user_id: loggedUser.id
+          })
+        });
+      } catch (err) {
+        console.error("Session migration failed:", err);
+      }
+
+      setIsAuthModalOpen(false);
+      setAuthEmail("");
+      setAuthPassword("");
+      setAuthName("");
+      setAuthPhone("");
+
+      // Check if profile is incomplete (missing WhatsApp/phone)
+      if (!loggedUser.phone || !loggedUser.phone.trim()) {
+        setCompleteName(loggedUser.name || "");
+        setCompletePhone("");
+        setCompleteProfileError("");
+        setIsCompleteProfileOpen(true);
+      }
+    } catch (err: any) {
+      setAuthError(err.message || "Something went wrong");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("aimer-user-profile");
+    localStorage.removeItem("aimer-auth-token");
+    window.location.reload();
+  };
+
+  const handleGoogleLogin = async () => {
+    setAuthError("");
+    setAuthLoading(true);
+
+    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+
+    // Safety timeout fallback
+    const safetyTimeout = setTimeout(() => {
+      setAuthLoading(false);
+    }, 30000);
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = await result.user.getIdToken();
+
+      const authResponse = await fetch(`${baseUrl}/v1/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: idToken })
+      });
+
+      const data = await authResponse.json();
+      if (!authResponse.ok) {
+        throw new Error(data.detail || "Google Login failed");
+      }
+
+      const loggedUser = data.user;
+      const token = data.access_token;
+      
+      setUser(loggedUser);
+      localStorage.setItem("aimer-user-profile", JSON.stringify(loggedUser));
+      if (token) {
+        localStorage.setItem("aimer-auth-token", token);
+      }
+
+      try {
+        await fetch(`${baseUrl}/v1/auth/migrate-session`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            temp_session_id: sessionId,
+            user_id: loggedUser.id
+          })
+        });
+      } catch (err) {
+        console.error("Session migration failed:", err);
+      }
+
+      setIsAuthModalOpen(false);
+
+      // Check if profile is incomplete (missing WhatsApp/phone)
+      if (!loggedUser.phone || !loggedUser.phone.trim()) {
+        setCompleteName(loggedUser.name || "");
+        setCompletePhone("");
+        setCompleteProfileError("");
+        setIsCompleteProfileOpen(true);
+      }
+    } catch (err: any) {
+      if (err.code === "auth/popup-closed-by-user" || err.message?.includes("closed-by-user")) {
+        setAuthError(lang === "id" ? "Masuk dengan Google dibatalkan oleh pengguna." : "Google Sign-In was cancelled by user.");
+      } else if (err.code === "auth/cancelled-popup-request" || err.message?.includes("cancelled-popup-request")) {
+        setAuthError(lang === "id" ? "Proses masuk dibatalkan." : "Sign-in request cancelled.");
+      } else {
+        setAuthError(err.message || "Google Login failed");
+      }
+    } finally {
+      clearTimeout(safetyTimeout);
+      setAuthLoading(false);
+    }
+  };
+
+  const handleCompleteProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCompleteProfileError("");
+    setCompleteProfileLoading(true);
+
+    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+
+    try {
+      if (!user) {
+        throw new Error("Sesi pengguna tidak aktif.");
+      }
+
+      const phoneClean = completePhone.trim();
+      if (!phoneClean) {
+        throw new Error(lang === "id" ? "Nomor WhatsApp wajib diisi." : "WhatsApp number is required.");
+      }
+
+      const response = await fetch(`${baseUrl}/v1/auth/update-profile`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.id,
+          phone: phoneClean,
+          name: completeName.trim() || undefined,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || "Gagal memperbarui profil.");
+      }
+
+      const updatedUser = data.user;
+      setUser(updatedUser);
+      localStorage.setItem("aimer-user-profile", JSON.stringify(updatedUser));
+
+      setIsCompleteProfileOpen(false);
+      setCompletePhone("");
+      setCompleteName("");
+    } catch (err: any) {
+      setCompleteProfileError(err.message || "Something went wrong");
+    } finally {
+      setCompleteProfileLoading(false);
+    }
+  };
 
   // ─── Quick Prompts: fetch dari API ──────────────────────────────────────────
   const [quickPrompts, setQuickPrompts] = useState<QuickPrompt[]>(() => buildFallbackPrompts("id"));
@@ -271,14 +531,20 @@ export default function App() {
       const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
       const endpoint = `${baseUrl}/v1/agent/chat`;
 
+      const token = localStorage.getItem("aimer-auth-token");
+      const headersInit: Record<string, string> = {
+        "Content-Type": "application/json",
+        "Accept": "text/event-stream",
+      };
+      if (token) {
+        headersInit["Authorization"] = `Bearer ${token}`;
+      }
+
       const response = await fetch(endpoint, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "text/event-stream",
-        },
+        headers: headersInit,
         body: JSON.stringify({
-          user_id: "user-aimer-1",
+          user_id: user ? user.id : guestUserId,
           session_id: sessionId,
           lang: lang,
           messages: [
@@ -483,7 +749,7 @@ export default function App() {
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-50 border border-indigo-200 shadow-[0_0_15px_rgba(99,102,241,0.1)] overflow-hidden">
               <Avatar className="w-full h-full rounded-none">
-                <AvatarImage src="/images/Luna.png" className="object-cover" />
+                <AvatarImage src="/images/Lina.png" className="object-cover" />
                 <AvatarFallback className="bg-transparent rounded-none">
                   <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" />
                 </AvatarFallback>
@@ -503,6 +769,35 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Auth Button */}
+            {user ? (
+              <div className="flex items-center gap-2 mr-1">
+                <div className="hidden sm:flex flex-col items-end">
+                  <span className="text-xs font-black text-slate-800 leading-none">{user.name}</span>
+                  <span className="text-[9px] text-slate-400 font-bold uppercase mt-1 leading-none tracking-wider">{user.role}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-100 hover:border-rose-300 text-rose-600 transition-all duration-300 shadow-sm text-xs font-bold active:scale-95 cursor-pointer group"
+                  title="Logout"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-rose-500 group-hover:text-rose-600" />
+                  <span className="hidden md:inline">{t.logoutBtn}</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setAuthMode("login");
+                  setIsAuthModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-indigo-200 bg-indigo-50/50 hover:bg-indigo-100 hover:border-indigo-300 text-indigo-600 transition-all duration-300 shadow-sm text-xs font-bold active:scale-95 cursor-pointer mr-1 group"
+              >
+                <User className="w-3.5 h-3.5 text-indigo-500 group-hover:text-indigo-600" />
+                <span>{t.loginBtn}</span>
+              </button>
+            )}
+
             {/* Help / Guide Button */}
             <button
               onClick={() => setIsHelpOpen(true)}
@@ -514,6 +809,7 @@ export default function App() {
                 {lang === "id" ? "Bantuan" : "Help"}
               </span>
             </button>
+
 
             {/* Language Toggle */}
             <button
@@ -595,7 +891,7 @@ export default function App() {
               <div className="flex-shrink-0 mt-1">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-100 border-indigo-200 to-slate-50 border flex items-center justify-center shadow-lg overflow-hidden">
                   <Avatar className="w-full h-full rounded-none">
-                    <AvatarImage src="/images/Luna.png" className="object-cover" />
+                    <AvatarImage src="/images/Lina.png" className="object-cover" />
                     <AvatarFallback className="bg-transparent rounded-none">
                       <Sparkles className="w-5 h-5 text-indigo-600" />
                     </AvatarFallback>
@@ -761,6 +1057,467 @@ export default function App() {
               >
                 {t.helpClose}
               </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* ============================================================
+          Premium Auth Modal Dialog (Bilingual & Glassmorphic)
+      ============================================================ */}
+      {isAuthModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="relative w-full max-w-md bg-white/95 backdrop-blur-xl border border-indigo-100 shadow-2xl rounded-3xl overflow-hidden p-6 sm:p-8"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 border-b pb-3 border-indigo-50/50">
+              <div className="flex items-center gap-2">
+                <User className="w-5.5 h-5.5 text-indigo-600 animate-pulse" />
+                <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-800">
+                  {authMode === "login" ? t.loginTitle : t.registerTitle}
+                </h2>
+              </div>
+              <button 
+                onClick={() => {
+                  setIsAuthModalOpen(false);
+                  setAuthError("");
+                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors font-bold text-sm cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Error Message */}
+            {authError && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-semibold">
+                {authError}
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              {authMode === "register" && (
+                <>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600">{t.nameLabel}</label>
+                    <input
+                      type="text"
+                      required
+                      value={authName}
+                      onChange={(e) => setAuthName(e.target.value)}
+                      className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
+                      placeholder="e.g. Amamiya Kun"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600">{t.phoneLabel}</label>
+                    <input
+                      type="tel"
+                      required
+                      value={authPhone}
+                      onChange={(e) => setAuthPhone(e.target.value)}
+                      className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
+                      placeholder="e.g. 08123456789"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-600">{t.emailLabel}</label>
+                <input
+                  type="email"
+                  required
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
+                  placeholder="name@email.com"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-600">{t.passwordLabel}</label>
+                <input
+                  type="password"
+                  required
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={authLoading}
+                className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+              >
+                {authLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : authMode === "login" ? t.submitLogin : t.submitRegister}
+              </button>
+            </form>
+
+            {/* Premium Google OAuth Divider */}
+            <div className="my-4 flex items-center justify-between gap-3">
+              <span className="h-[1px] w-full bg-slate-200 dark:bg-white/10" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none px-1">{t.orDivider}</span>
+              <span className="h-[1px] w-full bg-slate-200 dark:bg-white/10" />
+            </div>
+
+            {/* Google Sign-In Button Container */}
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={authLoading}
+              className="w-full flex justify-center items-center gap-3 h-[46px] rounded-xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 active:scale-[0.98] cursor-pointer"
+            >
+              <img src="/google.svg" alt="Google" className="w-5 h-5 object-contain" />
+              <span className="text-sm font-bold text-slate-700">{t.loginBtn} {lang === "id" ? "dengan Google" : "with Google"}</span>
+            </button>
+
+            {/* Toggle Mode Link */}
+            <div className="mt-6 text-center border-t border-indigo-50/50 pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode(authMode === "login" ? "register" : "login");
+                  setAuthError("");
+                }}
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 hover:underline transition cursor-pointer"
+              >
+                {authMode === "login" ? t.switchToRegister : t.switchToLogin}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* ============================================================
+          Premium Lengkapi Profil Modal Dialog (Glassmorphic)
+      ============================================================ */}
+      {isCompleteProfileOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-md">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="relative w-full max-w-md bg-white/95 backdrop-blur-xl border border-indigo-100 shadow-2xl rounded-3xl overflow-hidden p-6 sm:p-8"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4 border-b pb-3 border-indigo-50/50">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5.5 h-5.5 text-indigo-600 animate-bounce" />
+                <h2 className="text-lg sm:text-xl font-extrabold tracking-tight text-slate-800">
+                  {lang === "id" ? "Lengkapi Profil Anda" : "Complete Your Profile"}
+                </h2>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-500 mb-4 leading-relaxed font-medium">
+              {lang === "id" 
+                ? "Selamat! Akun Anda aktif. Silakan lengkapi data penting berikut agar asisten Lina dapat memproses booking produk ke WhatsApp Anda secara otomatis tanpa perlu menanyakan data Anda berulang kali di masa mendatang. 😊"
+                : "Welcome! Your account is active. Please complete the following details so Lina can automatically book products for you in the future without asking for details repeatedly. 😊"}
+            </p>
+
+            {/* Error Message */}
+            {completeProfileError && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-semibold">
+                {completeProfileError}
+              </div>
+            )}
+
+            {/* Form */}
+            <form onSubmit={handleCompleteProfileSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-400">
+                  {lang === "id" ? "Alamat Email (Otomatis dari Google)" : "Email Address (Auto from Google)"}
+                </label>
+                <input
+                  type="email"
+                  disabled
+                  readOnly
+                  value={user?.email || ""}
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-100/80 text-sm text-slate-400 cursor-not-allowed select-none focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-600">
+                  {lang === "id" ? "Nama Lengkap" : "Full Name"}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={completeName}
+                  onChange={(e) => setCompleteName(e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
+                  placeholder="e.g. Amamiya Kun"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-600">
+                  {lang === "id" ? "Nomor WhatsApp Aktif" : "Active WhatsApp Number"}
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={completePhone}
+                  onChange={(e) => setCompletePhone(e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
+                  placeholder="e.g. 08123456789"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={completeProfileLoading}
+                className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+              >
+                {completeProfileLoading ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (lang === "id" ? "Simpan & Mulai Percakapan" : "Save & Start Chat")}
+              </button>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {isLandingOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-slate-900/50 backdrop-blur-md overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="relative w-full md:w-[95%] lg:w-[92%] xl:w-[90%] max-w-7xl h-auto my-auto bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 shadow-2xl rounded-none overflow-hidden flex flex-col md:flex-row transition-all duration-500"
+          >
+            {/* Top Accent Line decoration (Minimalist and elegant) */}
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-indigo-500/90 z-25" />
+
+            {/* Corner crosshairs for a technical/minimalist blueprint aesthetic */}
+            <div className="absolute top-2 left-2 text-slate-300/40 dark:text-slate-700/40 font-mono text-[10px] pointer-events-none select-none hidden md:block">┌ AIMER FUTURE ┐</div>
+            <div className="absolute bottom-2 right-2 text-slate-300/40 dark:text-slate-700/40 font-mono text-[10px] pointer-events-none select-none hidden md:block">└ v0.0.1 ┘</div>
+
+            {/* Left Column: Slogan & Visual Cover (Apple/Samsung Aesthetic) - Hidden on Mobile */}
+            <div className="relative w-full md:w-[38%] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-8 sm:p-10 lg:p-12 lg:py-16 hidden md:flex flex-col justify-between overflow-hidden text-white border-r border-slate-800 shrink-0 rounded-none animate-fade-in">
+              {/* Mesh background effects (reduced opacity for softer feel) */}
+              <div className="absolute inset-0 opacity-10 mix-blend-overlay bg-[radial-gradient(circle_at_30%_30%,#818cf8,transparent_50%),radial-gradient(circle_at_70%_70%,#c084fc,transparent_50%)]" />
+              <div 
+                className="absolute inset-0 opacity-[0.03] pointer-events-none"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
+                  `,
+                  backgroundSize: "20px 20px"
+                }}
+              />
+              
+              {/* Brand Top */}
+              <div className="relative z-10 flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-none bg-white/5 border border-white/10 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-indigo-300 animate-pulse" />
+                </div>
+                <span className="font-bold tracking-[0.2em] text-xs sm:text-sm text-slate-300 uppercase">{t.brandName}</span>
+              </div>
+
+              {/* Center: Glowing Aura & Slogan */}
+              <div className="relative z-10 my-10 flex flex-col items-center md:items-start text-center md:text-left">
+                {/* Geometric square wrapper with avatar */}
+                <div className="relative w-28 h-28 sm:w-32 sm:h-32 lg:w-36 lg:h-36 flex items-center justify-center bg-slate-900/60 border border-slate-800 shadow-[0_0_20px_rgba(99,102,241,0.03)] mb-8">
+                  <div className="absolute inset-1 border border-slate-850" />
+                  <div className="absolute -inset-1.5 border border-dashed border-slate-800/30 animate-pulse" />
+                  <Avatar className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-none border border-slate-800 overflow-hidden shadow-inner">
+                    <AvatarImage src="/images/Lina.png" className="object-cover" />
+                    <AvatarFallback className="bg-indigo-950/50">
+                      <Sparkles className="w-10 h-10 text-indigo-300" />
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-300 bg-indigo-500/10 border border-indigo-400/20 px-3.5 py-1.5 rounded-none mb-4 inline-block">
+                  {lang === "id" ? "Asisten AI Lina" : "AI Consultant Lina"}
+                </span>
+
+                <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-light leading-tight tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-slate-100 via-slate-200 to-indigo-200">
+                  {t.landing.slogan}
+                </h2>
+                
+                <p className="text-sm sm:text-base text-slate-350/90 font-normal mt-4 max-w-xs leading-relaxed">
+                  {t.landing.subSlogan}
+                </p>
+              </div>
+
+              {/* Footer text */}
+              <div className="relative z-10 text-xs text-slate-500 font-semibold tracking-[0.1em] uppercase flex items-center gap-1.5 justify-center md:justify-start">
+                <span className="w-1 h-1 bg-slate-600" />
+                Powered by Gemini AI
+              </div>
+            </div>
+
+            {/* Right Column: Greetings, Features, Actions */}
+            <div className="w-full md:w-[62%] p-4 sm:p-8 md:p-12 lg:p-14 lg:py-16 flex flex-col justify-between bg-white dark:bg-slate-900 rounded-none relative">
+              {/* Header Right: Language Selector & Auth Quick Actions */}
+              <div className="flex items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-2 md:pb-4 mb-3 md:mb-6">
+                {/* Language Switcher (Sharp corners) */}
+                <button
+                  onClick={toggleLang}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-none border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition duration-300 text-xs font-semibold text-slate-650 dark:text-slate-355 cursor-pointer animate-fade-in"
+                >
+                  <Globe className="w-3.5 h-3.5 text-slate-550" />
+                  <span>{lang === "id" ? "ID" : "EN"}</span>
+                  <span className="text-slate-455 font-normal">→</span>
+                  <span className="text-indigo-500 dark:text-indigo-400">{lang === "id" ? "EN" : "ID"}</span>
+                </button>
+
+                {/* Login or user profile state */}
+                {user ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{user.name}</span>
+                    <span className="text-[10px] text-indigo-500 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-none uppercase tracking-wider">{user.role}</span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setAuthMode("login");
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-none border border-slate-200 dark:border-slate-800 bg-slate-50/50 hover:bg-slate-100/50 text-slate-700 dark:text-slate-300 transition text-xs font-semibold active:scale-95 cursor-pointer"
+                  >
+                    <User className="w-3.5 h-3.5 text-slate-550" />
+                    <span>{t.loginBtn}</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Body: Welcoming Description & Features Grid */}
+              <div className="flex-1 space-y-3.5 md:space-y-8">
+                {/* Mobile-only header (hidden on desktop) */}
+                <div className="flex items-center gap-2.5 md:hidden p-2.5 rounded-none bg-slate-50 dark:bg-slate-900/60 border border-slate-150 dark:border-slate-800">
+                  <Avatar className="w-10 h-10 rounded-none border border-slate-300 dark:border-slate-800 overflow-hidden shadow-inner shrink-0">
+                    <AvatarImage src="/images/Lina.png" className="object-cover" />
+                    <AvatarFallback className="bg-indigo-950/50">
+                      <Sparkles className="w-5 h-5 text-indigo-300" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">{t.landing.slogan}</h4>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">{t.landing.subSlogan}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="hidden md:block text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-800 dark:text-slate-200">
+                    {lang === "id" ? "Selamat Datang di Aimer Future!" : "Welcome to Aimer Future!"}
+                  </h3>
+                  <p className="text-[13px] sm:text-base lg:text-[17px] text-slate-500 dark:text-slate-400 mt-0.5 md:mt-3 font-normal leading-relaxed">
+                    <span className="md:hidden">
+                      {lang === "id" 
+                        ? "Temukan smartphone impian Anda bersama Lina. Dapatkan rekomendasi akurat dan sistem booking WhatsApp otomatis!" 
+                        : "Find your dream smartphone with Lina. Get accurate recommendations and automated WhatsApp booking!"}
+                    </span>
+                    <span className="hidden md:inline">{t.landing.description}</span>
+                  </p>
+                </div>
+
+                {/* Features Highlight (Premium Minimalist design with sharp corners and thin borders) - Hidden on Mobile */}
+                <div className="hidden md:block space-y-3.5">
+                  <h4 className="text-xs lg:text-sm font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">
+                    {t.landing.featuresTitle}
+                  </h4>
+
+                  {/* Feature 1 */}
+                  <div className="flex items-start gap-3.5 p-3.5 border border-slate-150 dark:border-slate-800/80 bg-slate-50/20 dark:bg-slate-900/20 hover:bg-slate-50 dark:hover:bg-slate-850/50 transition duration-300 rounded-none">
+                    <div className="w-12 h-12 rounded-none border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center shrink-0 text-slate-600 dark:text-slate-355">
+                      <MessageSquare className="w-5.5 h-5.5" />
+                    </div>
+                    <div>
+                      <h5 className="text-sm sm:text-base font-bold text-slate-850 dark:text-slate-200">{t.landing.feature1Title}</h5>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{t.landing.feature1Desc}</p>
+                    </div>
+                  </div>
+
+                  {/* Feature 2 */}
+                  <div className="flex items-start gap-3.5 p-3.5 border border-slate-150 dark:border-slate-800/80 bg-slate-50/20 dark:bg-slate-900/20 hover:bg-slate-50 dark:hover:bg-slate-850/50 transition duration-300 rounded-none">
+                    <div className="w-12 h-12 rounded-none border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center shrink-0 text-slate-600 dark:text-slate-355">
+                      <Cpu className="w-5.5 h-5.5" />
+                    </div>
+                    <div>
+                      <h5 className="text-sm sm:text-base font-bold text-slate-850 dark:text-slate-200">{t.landing.feature2Title}</h5>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{t.landing.feature2Desc}</p>
+                    </div>
+                  </div>
+
+                  {/* Feature 3 */}
+                  <div className="flex items-start gap-3.5 p-3.5 border border-slate-150 dark:border-slate-800/80 bg-slate-50/20 dark:bg-slate-900/20 hover:bg-slate-50 dark:hover:bg-slate-850/50 transition duration-300 rounded-none">
+                    <div className="w-12 h-12 rounded-none border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center shrink-0 text-slate-600 dark:text-slate-355">
+                      <ShoppingBag className="w-5.5 h-5.5" />
+                    </div>
+                    <div>
+                      <h5 className="text-sm sm:text-base font-bold text-slate-850 dark:text-slate-200">{t.landing.feature3Title}</h5>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{t.landing.feature3Desc}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile-only compact features grid (shows icons and titles side-by-side to save space) */}
+                <div className="grid grid-cols-3 gap-2 md:hidden">
+                  <div className="flex flex-col items-center text-center p-1.5 border border-slate-150 dark:border-slate-800/60 bg-slate-50/20 dark:bg-slate-900/20 rounded-none">
+                    <MessageSquare className="w-4 h-4 text-indigo-500 mb-1" />
+                    <span className="text-[9.5px] tracking-tight font-bold text-slate-700 dark:text-slate-300 leading-tight">{t.landing.feature1Title}</span>
+                  </div>
+                  <div className="flex flex-col items-center text-center p-1.5 border border-slate-150 dark:border-slate-800/60 bg-slate-50/20 dark:bg-slate-900/20 rounded-none">
+                    <Cpu className="w-4 h-4 text-indigo-500 mb-1" />
+                    <span className="text-[9.5px] tracking-tight font-bold text-slate-700 dark:text-slate-300 leading-tight">{t.landing.feature2Title}</span>
+                  </div>
+                  <div className="flex flex-col items-center text-center p-1.5 border border-slate-150 dark:border-slate-800/60 bg-slate-50/20 dark:bg-slate-900/20 rounded-none">
+                    <ShoppingBag className="w-4 h-4 text-indigo-500 mb-1" />
+                    <span className="text-[9.5px] tracking-tight font-bold text-slate-700 dark:text-slate-300 leading-tight">{t.landing.feature3Title}</span>
+                  </div>
+                </div>
+
+                {/* Quick Start Topics Selector */}
+                <div className="pt-0.5 md:pt-2">
+                  <h4 className="text-[10px] md:text-xs lg:text-sm font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 mb-1.5 md:mb-4">
+                    {t.landing.quickStartTitle}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2.5 md:gap-3">
+                    {quickPrompts.slice(0, 2).map((qp) => (
+                      <button
+                        key={qp.id}
+                        onClick={() => {
+                          dismissLanding();
+                          handleSendMessage(qp.prompt);
+                        }}
+                        className="text-left p-2 sm:p-3 md:p-3.5 rounded-none border border-slate-150 dark:border-slate-850/80 bg-slate-50/40 dark:bg-slate-900/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 hover:border-slate-250 dark:hover:border-slate-700 transition duration-200 cursor-pointer group active:scale-[0.99]"
+                      >
+                        <div className="flex items-center gap-1.5 md:gap-2 mb-1 sm:mb-1.5">
+                          <span className="text-xs sm:text-base shrink-0">{qp.icon}</span>
+                          <span className="text-[11px] sm:text-sm font-bold text-slate-750 dark:text-slate-300 truncate group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
+                            {qp.title}
+                          </span>
+                        </div>
+                        <p className="text-[10px] sm:text-xs text-slate-405 dark:text-slate-500 truncate font-normal leading-none">{qp.description}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Call-to-action Button */}
+              <div className="mt-4 md:mt-10 pt-3 md:pt-5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center md:justify-end gap-4">
+                {/* Premium Monochrome CTA Button with sharp corners (centered and height-reduced on mobile) */}
+                <button
+                  onClick={dismissLanding}
+                  className="w-full md:w-auto mx-auto md:mx-0 md:ml-auto px-5 py-2 md:px-8 md:py-2.5 rounded-none bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 text-white dark:text-slate-900 font-bold text-xs sm:text-sm border border-slate-800 dark:border-slate-200 shadow-sm transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 cursor-pointer group"
+                >
+                  <span>{t.landing.startBtn}</span>
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -948,7 +1705,7 @@ function ChatMessage({
         ) : (
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br border flex items-center justify-center overflow-hidden from-indigo-50 to-indigo-100/50 border-indigo-200 shadow-sm">
             <Avatar className="w-full h-full rounded-none">
-              <AvatarImage src="/images/Luna.png" className="object-cover" />
+              <AvatarImage src="/images/Lina.png" className="object-cover" />
               <AvatarFallback className="bg-transparent rounded-none">
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
               </AvatarFallback>

@@ -17,6 +17,15 @@ export default defineConfig({
     },
   },
 
+  server: {
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+    },
+    allowedHosts: [
+      "each-investment-consolidation-expansion.trycloudflare.com"
+    ]
+  },
+
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 })
