@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
-import { Send, Paperclip, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu } from "lucide-react";
+import { Send, Paperclip, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu, Download } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -69,11 +69,54 @@ export function extractProductIdsFromResponse(text: string): string[] {
 }
 
 /**
+ * Helper to clean a specific bracketed tag (like [PRODUCTS:... or [PENELUSURAN:...)
+ * by finding balanced brackets while handling potential quoted strings inside.
+ */
+function removeBracketedTag(text: string, prefix: string): string {
+  let index = text.indexOf(prefix);
+  while (index !== -1) {
+    let bracketCount = 1;
+    let inString = false;
+    let escaped = false;
+    let i = index + prefix.length;
+    
+    for (; i < text.length; i++) {
+      const char = text[i];
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (char === '\\') {
+          escaped = true;
+        } else if (char === '"') {
+          inString = false;
+        }
+      } else {
+        if (char === '"') {
+          inString = true;
+        } else if (char === '[') {
+          bracketCount++;
+        } else if (char === ']') {
+          bracketCount--;
+          if (bracketCount === 0) {
+            i++; // include the closing bracket
+            break;
+          }
+        }
+      }
+    }
+    // Remove the block from index to i
+    text = text.slice(0, index) + text.slice(i);
+    index = text.indexOf(prefix);
+  }
+  return text;
+}
+
+/**
  * Hapus blok [PRODUCTS:{...}] atau [PRODUCTS:id1,id2,id3] dari teks agar tidak muncul mentah di chat bubble.
  */
 export function cleanTextFromProducts(text: string): string {
-  let cleaned = text.replace(/\[PRODUCTS:[\s\S]*?(?:\]|$)/g, "");
-  cleaned = cleaned.replace(/\[PENELUSURAN:[\s\S]*?(?:\]|$)/g, "");
+  let cleaned = removeBracketedTag(text, "[PRODUCTS:");
+  cleaned = removeBracketedTag(cleaned, "[PENELUSURAN:");
   return cleaned.trimEnd();
 }
 
@@ -1566,24 +1609,85 @@ function ChatMessage({
 
   const renderMessageContent = (text: string): ReactNode => {
     const processFormatting = (content: string) => {
-      const parts = content.split(/(\*\*.*?\*\*)/g);
-      return parts.map((part, i) => {
-        if (part.startsWith("**") && part.endsWith("**")) {
-          const boldText = part.slice(2, -2);
-          if (isUser) {
-            return <strong key={i} className="font-extrabold text-white">{boldText}</strong>;
+      const parts: React.ReactNode[] = [];
+      const linkRegex = /\[([\s\S]*?)\]\((https?:\/\/[^\)]+)\)/g;
+      let lastIndex = 0;
+      let match: RegExpExecArray | null;
+      let keyCounter = 0;
+
+      const formatBold = (text: string) => {
+        const boldParts = text.split(/(\*\*.*?\*\*)/g);
+        return boldParts.map((part, i) => {
+          if (part.startsWith("**") && part.endsWith("**")) {
+            const boldText = part.slice(2, -2);
+            if (isUser) {
+              return <strong key={i} className="font-extrabold text-white">{boldText}</strong>;
+            }
+            return (
+              <strong
+                key={i}
+                className="font-bold tracking-normal px-1.5 py-0.5 rounded mx-0.5 inline-block border text-indigo-950 bg-indigo-50/30 border-indigo-100/20"
+              >
+                {boldText}
+              </strong>
+            );
           }
-          return (
-            <strong
-              key={i}
-              className="font-bold tracking-normal px-1.5 py-0.5 rounded mx-0.5 inline-block border text-indigo-950 bg-indigo-50/30 border-indigo-100/20"
+          return part;
+        });
+      };
+
+      while ((match = linkRegex.exec(content)) !== null) {
+        if (match.index > lastIndex) {
+          parts.push(<span key={`text-${keyCounter++}`}>{formatBold(content.substring(lastIndex, match.index))}</span>);
+        }
+
+        const linkText = match[1];
+        const linkUrl = match[2];
+        const isDownload = linkText.toLowerCase().includes("download");
+
+        if (isDownload) {
+          parts.push(
+            <a
+              key={`link-${keyCounter++}`}
+              href={linkUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2.5 my-1 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all duration-300 active:scale-95 cursor-pointer shadow-md shadow-indigo-500/10 decoration-transparent",
+                !isUser
+                  ? "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white border border-indigo-600/15"
+                  : "bg-white text-indigo-600 hover:bg-slate-50 border border-white"
+              )}
             >
-              {boldText}
-            </strong>
+              <Download className="w-3.5 h-3.5 shrink-0 animate-bounce" style={{ animationDuration: '2s' }} />
+              <span>{linkText}</span>
+            </a>
+          );
+        } else {
+          parts.push(
+            <a
+              key={`link-${keyCounter++}`}
+              href={linkUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "underline font-bold transition-all duration-200 hover:opacity-80",
+                !isUser ? "text-indigo-600 hover:text-indigo-700" : "text-white hover:text-slate-100"
+              )}
+            >
+              {linkText}
+            </a>
           );
         }
-        return part;
-      });
+
+        lastIndex = match.index + match[0].length;
+      }
+
+      if (lastIndex < content.length) {
+        parts.push(<span key={`text-${keyCounter++}`}>{formatBold(content.substring(lastIndex))}</span>);
+      }
+
+      return parts;
     };
 
     const renderTextSegment = (segmentText: string) => {
