@@ -40,7 +40,7 @@ export function parseProductsFromResponse(text: string): Product[] {
           camera: String((p.specs as Record<string, unknown>)?.camera ?? "-"),
           battery: String((p.specs as Record<string, unknown>)?.battery ?? "-"),
         },
-        tags: Array.isArray(p.tags) ? (p.tags as string[]) : ["Toko Aimer"],
+        tags: Array.isArray(p.tags) ? (p.tags as string[]) : ["Toko IRIN Cellular"],
         image: String(p.image ?? `https://placehold.co/300x300/e2e8f0/475569?text=${encodeURIComponent(String(p.name ?? "Produk")).slice(0, 15)}`),
         colors: Array.isArray(p.colors) ? (p.colors as { name: string; hex: string }[]) : [{ name: "Default", hex: "#8E8E93" }],
       } satisfies Product;
@@ -188,7 +188,7 @@ export default function App() {
   // ─── Language State (persisted in localStorage) ──────────────────────────
   const [lang, setLang] = useState<Lang>(() => {
     try {
-      const saved = localStorage.getItem("aimer-lang");
+      const saved = localStorage.getItem("irin-lang");
       return (saved === "id" || saved === "en") ? saved : "id";
     } catch {
       return "id";
@@ -199,7 +199,7 @@ export default function App() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isLandingOpen, setIsLandingOpen] = useState<boolean>(() => {
     try {
-      const saved = sessionStorage.getItem("aimer-landing-dismissed");
+      const saved = sessionStorage.getItem("irin-landing-dismissed");
       return saved !== "true";
     } catch {
       return true;
@@ -209,14 +209,14 @@ export default function App() {
   const dismissLanding = () => {
     setIsLandingOpen(false);
     try {
-      sessionStorage.setItem("aimer-landing-dismissed", "true");
+      sessionStorage.setItem("irin-landing-dismissed", "true");
     } catch { /* noop */ }
   };
 
   const toggleLang = () => {
     const next: Lang = lang === "id" ? "en" : "id";
     setLang(next);
-    try { localStorage.setItem("aimer-lang", next); } catch { /* noop */ }
+    try { localStorage.setItem("irin-lang", next); } catch { /* noop */ }
   };
 
   const [sessionId] = useState(() => "session-" + Math.random().toString(36).substring(2, 15) + "-" + Date.now());
@@ -224,10 +224,10 @@ export default function App() {
   // ─── Guest & Logged In User State ───────────────────────────────────────
   const [guestUserId] = useState(() => {
     try {
-      let id = localStorage.getItem("aimer-guest-user-id");
+      let id = localStorage.getItem("irin-guest-user-id");
       if (!id) {
         id = "guest-" + Math.random().toString(36).substring(2, 11) + "-" + Date.now();
-        localStorage.setItem("aimer-guest-user-id", id);
+        localStorage.setItem("irin-guest-user-id", id);
       }
       return id;
     } catch {
@@ -246,7 +246,7 @@ export default function App() {
 
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
-      const saved = localStorage.getItem("aimer-user-profile");
+      const saved = localStorage.getItem("irin-user-profile");
       return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -267,6 +267,7 @@ export default function App() {
   const [isCompleteProfileOpen, setIsCompleteProfileOpen] = useState(false);
   const [completeName, setCompleteName] = useState("");
   const [completePhone, setCompletePhone] = useState("");
+  const [completePassword, setCompletePassword] = useState("");
   const [completeProfileError, setCompleteProfileError] = useState("");
   const [completeProfileLoading, setCompleteProfileLoading] = useState(false);
 
@@ -299,9 +300,9 @@ export default function App() {
       const loggedUser = data.user;
       const token = data.access_token;
       setUser(loggedUser);
-      localStorage.setItem("aimer-user-profile", JSON.stringify(loggedUser));
+      localStorage.setItem("irin-user-profile", JSON.stringify(loggedUser));
       if (token) {
-        localStorage.setItem("aimer-auth-token", token);
+        localStorage.setItem("irin-auth-token", token);
       }
 
       // Trigger session migration
@@ -340,8 +341,8 @@ export default function App() {
 
   const handleLogout = () => {
     setUser(null);
-    localStorage.removeItem("aimer-user-profile");
-    localStorage.removeItem("aimer-auth-token");
+    localStorage.removeItem("irin-user-profile");
+    localStorage.removeItem("irin-auth-token");
     window.location.reload();
   };
 
@@ -376,9 +377,9 @@ export default function App() {
       const token = data.access_token;
       
       setUser(loggedUser);
-      localStorage.setItem("aimer-user-profile", JSON.stringify(loggedUser));
+      localStorage.setItem("irin-user-profile", JSON.stringify(loggedUser));
       if (token) {
-        localStorage.setItem("aimer-auth-token", token);
+        localStorage.setItem("irin-auth-token", token);
       }
 
       try {
@@ -442,6 +443,7 @@ export default function App() {
           user_id: user.id,
           phone: phoneClean,
           name: completeName.trim() || undefined,
+          password: completePassword.trim() || undefined,
         }),
       });
 
@@ -452,11 +454,12 @@ export default function App() {
 
       const updatedUser = data.user;
       setUser(updatedUser);
-      localStorage.setItem("aimer-user-profile", JSON.stringify(updatedUser));
+      localStorage.setItem("irin-user-profile", JSON.stringify(updatedUser));
 
       setIsCompleteProfileOpen(false);
       setCompletePhone("");
       setCompleteName("");
+      setCompletePassword("");
     } catch (err: any) {
       setCompleteProfileError(err.message || "Something went wrong");
     } finally {
@@ -574,7 +577,7 @@ export default function App() {
       const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
       const endpoint = `${baseUrl}/v1/agent/chat`;
 
-      const token = localStorage.getItem("aimer-auth-token");
+      const token = localStorage.getItem("irin-auth-token");
       const headersInit: Record<string, string> = {
         "Content-Type": "application/json",
         "Accept": "text/event-stream",
@@ -800,7 +803,7 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-sm sm:text-xl font-bold tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">
-                {t.brandName}
+                {t.aiHeader}
               </h1>
               <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
                 <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-pulse" />
@@ -1316,6 +1319,20 @@ export default function App() {
                 />
               </div>
 
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-600">
+                  {lang === "id" ? "Buat Kata Sandi" : "Create Password"}
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={completePassword}
+                  onChange={(e) => setCompletePassword(e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
+                  placeholder="••••••••"
+                />
+              </div>
+
               <button
                 type="submit"
                 disabled={completeProfileLoading}
@@ -1341,7 +1358,7 @@ export default function App() {
             <div className="absolute top-0 left-0 right-0 h-[3px] bg-indigo-500/90 z-25" />
 
             {/* Corner crosshairs for a technical/minimalist blueprint aesthetic */}
-            <div className="absolute top-2 left-2 text-slate-300/40 dark:text-slate-700/40 font-mono text-[10px] pointer-events-none select-none hidden md:block">┌ AIMER FUTURE ┐</div>
+            <div className="absolute top-2 left-2 text-slate-300/40 dark:text-slate-700/40 font-mono text-[10px] pointer-events-none select-none hidden md:block">┌ IRIN CELLULAR ┐</div>
             <div className="absolute bottom-2 right-2 text-slate-300/40 dark:text-slate-700/40 font-mono text-[10px] pointer-events-none select-none hidden md:block">└ v0.0.1 ┘</div>
 
             {/* Left Column: Slogan & Visual Cover (Apple/Samsung Aesthetic) - Hidden on Mobile */}
@@ -1454,7 +1471,7 @@ export default function App() {
 
                 <div>
                   <h3 className="hidden md:block text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-800 dark:text-slate-200">
-                    {lang === "id" ? "Selamat Datang di Aimer Future!" : "Welcome to Aimer Future!"}
+                    {lang === "id" ? "Selamat Datang di IRIN Cellular!" : "Welcome to IRIN Cellular!"}
                   </h3>
                   <p className="text-[13px] sm:text-base lg:text-[17px] text-slate-500 dark:text-slate-400 mt-0.5 md:mt-3 font-normal leading-relaxed">
                     <span className="md:hidden">
