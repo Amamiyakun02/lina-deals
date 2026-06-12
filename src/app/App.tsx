@@ -40,7 +40,7 @@ export function parseProductsFromResponse(text: string): Product[] {
           camera: String((p.specs as Record<string, unknown>)?.camera ?? "-"),
           battery: String((p.specs as Record<string, unknown>)?.battery ?? "-"),
         },
-        tags: Array.isArray(p.tags) ? (p.tags as string[]) : ["Toko IRIN Cellular"],
+        tags: Array.isArray(p.tags) ? (p.tags as string[]) : ["Toko Aimer"],
         image: String(p.image ?? `https://placehold.co/300x300/e2e8f0/475569?text=${encodeURIComponent(String(p.name ?? "Produk")).slice(0, 15)}`),
         colors: Array.isArray(p.colors) ? (p.colors as { name: string; hex: string }[]) : [{ name: "Default", hex: "#8E8E93" }],
       } satisfies Product;
@@ -1389,7 +1389,7 @@ export default function App() {
             <div className="absolute top-0 left-0 right-0 h-[3px] bg-indigo-500/90 z-25" />
 
             {/* Corner crosshairs for a technical/minimalist blueprint aesthetic */}
-            <div className="absolute top-2 left-2 text-slate-300/40 dark:text-slate-700/40 font-mono text-[10px] pointer-events-none select-none hidden md:block">┌ IRIN CELLULAR ┐</div>
+            <div className="absolute top-2 left-2 text-slate-300/40 dark:text-slate-700/40 font-mono text-[10px] pointer-events-none select-none hidden md:block">┌ AIMER FUTURE ┐</div>
             <div className="absolute bottom-2 right-2 text-slate-300/40 dark:text-slate-700/40 font-mono text-[10px] pointer-events-none select-none hidden md:block">└ v0.0.1 ┘</div>
 
             {/* Left Column: Slogan & Visual Cover (Apple/Samsung Aesthetic) - Hidden on Mobile */}
@@ -1502,7 +1502,7 @@ export default function App() {
 
                 <div>
                   <h3 className="hidden md:block text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-slate-800 dark:text-slate-200">
-                    {lang === "id" ? "Selamat Datang di IRIN Cellular!" : "Welcome to IRIN Cellular!"}
+                    {lang === "id" ? "Selamat Datang di Aimer Future!" : "Welcome to Aimer Future!"}
                   </h3>
                   <p className="text-[13px] sm:text-base lg:text-[17px] text-slate-500 dark:text-slate-400 mt-0.5 md:mt-3 font-normal leading-relaxed">
                     <span className="md:hidden">

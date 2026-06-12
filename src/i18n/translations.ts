@@ -100,11 +100,11 @@ export interface Translations {
 const id: Translations = {
   // Header
   agentOnline: "Agent Online",
-  brandName: "IRIN CELLULAR",
+  brandName: "AIMER FUTURE",
 
   // Welcome message
   welcomeMessage:
-    "Halo! Lina di sini, konsultan smartphone toko IRIN Cellular. 👋\n\nLina siap bantu kamu cari gadget terbaik sesuai kebutuhan dan budgetmu! Semua rekomendasi lina selalu berdasarkan produk yang tersedia di toko kita, jadi gak perlu khawatir soal keakuratan datanya ya 😊\n\nMau cari HP apa hari ini?",
+    "Halo! Lina di sini, konsultan smartphone toko Aimer. 👋\n\nLina siap bantu kamu cari gadget terbaik sesuai kebutuhan dan budgetmu! Semua rekomendasi lina selalu berdasarkan produk yang tersedia di toko kita, jadi gak perlu khawatir soal keakuratan datanya ya 😊\n\nMau cari HP apa hari ini?",
 
   // Input
   inputPlaceholder: "Tanyakan seputar smartphone...",
@@ -142,7 +142,7 @@ const id: Translations = {
   },
 
   // Error
-  connectionError: "Koneksi ke sistem **IRIN Cellular Agent** gagal. Coba lagi dalam beberapa saat.",
+  connectionError: "Koneksi ke sistem **Aimer Agent** gagal. Coba lagi dalam beberapa saat.",
 
   // Language toggle
   langToggleLabel: "EN",
@@ -158,7 +158,7 @@ const id: Translations = {
   bookingPrompt: (productName) => `Bisa tolong booking produk **${productName}** untuk saya?`,
 
   // Help Modal Bilingual
-  helpTitle: "IRIN Cellular Agent — Panduan Penggunaan",
+  helpTitle: "Aimer Agent — Panduan Penggunaan",
   helpIntro: "Halo! Lina di sini, asisten AI Anda. Berikut adalah panduan singkat cara berinteraksi dengan asisten pintar kami:",
   helpClose: "Mengerti, Tutup Panduan",
   helpFeatures: {
@@ -182,7 +182,7 @@ const id: Translations = {
   loginBtn: "Masuk",
   registerBtn: "Daftar",
   logoutBtn: "Keluar",
-  loginTitle: "Masuk ke IRIN Cellular",
+  loginTitle: "Masuk ke Aimer Future",
   registerTitle: "Daftar Akun Member",
   emailLabel: "Alamat Email",
   passwordLabel: "Kata Sandi",
@@ -200,7 +200,7 @@ const id: Translations = {
     subSlogan: "Asisten Gadget AI Terbaik untuk Anda",
     description: "Temukan smartphone impian Anda bersama Lina. Dapatkan rekomendasi akurat, cek ketersediaan stok real-time, dan lakukan pemesanan otomatis lewat WhatsApp.",
     startBtn: "Mulai Konsultasi",
-    featuresTitle: "Mengapa Memilih Asisten IRIN Cellular?",
+    featuresTitle: "Mengapa Memilih Asisten Aimer?",
     feature1Title: "Konsultasi Cerdas",
     feature1Desc: "Rekomendasi HP terbaik sesuai budget, spesifikasi, dan kebutuhan Anda secara akurat.",
     feature2Title: "Cek Stok Real-Time",
@@ -215,11 +215,11 @@ const id: Translations = {
 const en: Translations = {
   // Header
   agentOnline: "Agent Online",
-  brandName: "IRIN CELLULAR",
+  brandName: "AIMER FUTURE",
 
   // Welcome message
   welcomeMessage:
-    "Hello! Lina is here, IRIN Cellular store's smartphone consultant. 👋\n\nLina is ready to help you find the best gadget that fits your needs and budget! All recommendations from lina are always based on products available in our store, so no need to worry about data accuracy 😊\n\nWhat phone are you looking for today?",
+    "Hello! Lina is here, Aimer store's smartphone consultant. 👋\n\nLina is ready to help you find the best gadget that fits your needs and budget! All recommendations from lina are always based on products available in our store, so no need to worry about data accuracy 😊\n\nWhat phone are you looking for today?",
 
   // Input
   inputPlaceholder: "Ask about smartphones...",
@@ -257,7 +257,7 @@ const en: Translations = {
   },
 
   // Error
-  connectionError: "Connection to **IRIN Cellular Agent** failed. Please try again in a moment.",
+  connectionError: "Connection to **Aimer Agent** failed. Please try again in a moment.",
 
   // Language toggle
   langToggleLabel: "ID",
@@ -273,7 +273,7 @@ const en: Translations = {
   bookingPrompt: (productName) => `Could you please book the **${productName}** product for me?`,
 
   // Help Modal Bilingual
-  helpTitle: "IRIN Cellular Agent — Usage Guide",
+  helpTitle: "Aimer Agent — Usage Guide",
   helpIntro: "Hello! Lina is here, your AI smartphone assistant. Here is a quick guide on how to interact with our smart agent:",
   helpClose: "Got it, Close Guide",
   helpFeatures: {
@@ -297,7 +297,7 @@ const en: Translations = {
   loginBtn: "Sign In",
   registerBtn: "Sign Up",
   logoutBtn: "Sign Out",
-  loginTitle: "Sign In to IRIN Cellular",
+  loginTitle: "Sign In to Aimer Future",
   registerTitle: "Register Member Account",
   emailLabel: "Email Address",
   passwordLabel: "Password",
@@ -315,7 +315,7 @@ const en: Translations = {
     subSlogan: "Your Ultimate AI Gadget Companion",
     description: "Find your dream smartphone with Lina. Get accurate recommendations, check real-time stock availability, and reserve devices instantly through WhatsApp.",
     startBtn: "Start Consultation",
-    featuresTitle: "Why Choose IRIN Cellular Assistant?",
+    featuresTitle: "Why Choose Aimer Assistant?",
     feature1Title: "Intelligent Consultation",
     feature1Desc: "Accurate phone recommendations tailored to your budget, specs, and specific needs.",
     feature2Title: "Real-Time Stock Check",
