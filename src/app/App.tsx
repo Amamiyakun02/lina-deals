@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
-import { Send, Paperclip, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu, Download } from "lucide-react";
+import { Send, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu, Download } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -511,7 +511,6 @@ export default function App() {
 
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -544,16 +543,7 @@ export default function App() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  const handleFileClick = () => {
-    fileInputRef.current?.click();
-  };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      console.log("File selected:", files[0]);
-    }
-  };
 
   const handleSendMessage = async (textOverride?: string | React.MouseEvent) => {
     const textToSend = typeof textOverride === "string" ? textOverride : inputMessage;
@@ -828,25 +818,58 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Language Toggle */}
+            <button
+              id="lang-toggle-btn"
+              onClick={toggleLang}
+              title="Switch language / Ganti bahasa"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-100/80 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300 shadow-sm group"
+            >
+              <Globe className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-500 transition-colors" />
+              <span className="text-[11px] sm:text-xs font-bold tracking-widest text-slate-600 group-hover:text-indigo-600 transition-colors uppercase">
+                {lang === "id" ? "ID" : "EN"}
+              </span>
+              <span className="hidden sm:inline text-[10px] text-slate-400 group-hover:text-indigo-400 transition-colors font-medium">
+                → {t.langToggleLabel}
+              </span>
+            </button>
+
+            {/* Help / Guide Button */}
+            <button
+              onClick={() => setIsHelpOpen(true)}
+              title="Help / Panduan Penggunaan"
+              className="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 bg-slate-100/80 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300 shadow-sm group shrink-0"
+            >
+              <HelpCircle className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-500 transition-colors" />
+            </button>
+
             {/* Auth Button */}
             {user ? (
               <div className="relative shrink-0" ref={profileRef}>
                 {/* Profile Avatar Button */}
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold shadow-sm shrink-0 select-none cursor-pointer transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500"
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold shadow-sm shrink-0 select-none cursor-pointer transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 overflow-hidden"
                 >
-                  {user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />
+                  ) : (
+                    user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+                  )}
                 </button>
 
                 {/* Profile Dropdown Popover */}
                 {isProfileOpen && (
                   <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-slate-100 rounded-2xl shadow-xl p-4 space-y-3.5 z-50 animate-in fade-in slide-in-from-top-2 duration-250">
                     {/* User Info Header */}
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-inner shrink-0 bg-indigo-600">
-                        {user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
-                      </div>
+                    <div className="flex items-center gap-3 text-left">
+                      {user.avatar_url ? (
+                        <img src={user.avatar_url} alt={user.name} className="w-9 h-9 rounded-full object-cover shadow-inner shrink-0" />
+                      ) : (
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-inner shrink-0 bg-indigo-600">
+                          {user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                        </div>
+                      )}
                       <div className="min-w-0 flex-1 text-left">
                         <p className="text-xs font-bold text-slate-800 truncate">
                           {user.name}
@@ -895,32 +918,6 @@ export default function App() {
                 <span>{t.loginBtn}</span>
               </button>
             )}
-
-            {/* Help / Guide Button */}
-            <button
-              onClick={() => setIsHelpOpen(true)}
-              title="Help / Panduan Penggunaan"
-              className="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 bg-slate-100/80 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300 shadow-sm group shrink-0"
-            >
-              <HelpCircle className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-500 transition-colors" />
-            </button>
-
-
-            {/* Language Toggle */}
-            <button
-              id="lang-toggle-btn"
-              onClick={toggleLang}
-              title="Switch language / Ganti bahasa"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-100/80 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300 shadow-sm group"
-            >
-              <Globe className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-500 transition-colors" />
-              <span className="text-[11px] sm:text-xs font-bold tracking-widest text-slate-600 group-hover:text-indigo-600 transition-colors uppercase">
-                {lang === "id" ? "ID" : "EN"}
-              </span>
-              <span className="hidden sm:inline text-[10px] text-slate-400 group-hover:text-indigo-400 transition-colors font-medium">
-                → {t.langToggleLabel}
-              </span>
-            </button>
           </div>
         </header>
 
@@ -1013,21 +1010,6 @@ export default function App() {
             <div className="absolute -inset-1 bg-gradient-to-r from-indigo-200/50 via-purple-200/50 to-indigo-200/50 rounded-[24px] blur-md opacity-70 group-focus-within:opacity-100 transition duration-500" />
 
             <div className="relative flex items-center gap-1.5 sm:gap-3 backdrop-blur-xl border rounded-[20px] p-1.5 sm:p-2 shadow-2xl transition-all duration-300 bg-white/90 border-slate-200 focus-within:border-indigo-400 focus-within:bg-white">
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
-                className="hidden"
-              />
-              <button
-                onClick={handleFileClick}
-                className="p-2 sm:p-3 rounded-xl transition-colors text-slate-400 hover:text-indigo-600 hover:bg-slate-100"
-                title={t.attachFile}
-              >
-                <Paperclip className="w-5 h-5" />
-              </button>
-
               <textarea
                 ref={inputRef}
                 value={inputMessage}
@@ -1041,7 +1023,7 @@ export default function App() {
                 onKeyDown={handleKeyDown}
                 placeholder={t.inputPlaceholder}
                 rows={1}
-                className="flex-1 bg-transparent border-none shadow-none focus-visible:outline-none focus:outline-none focus:ring-0 text-[14px] sm:text-[15px] px-2 py-2 sm:py-3.5 resize-none h-10 sm:h-12 overflow-y-auto no-scrollbar text-slate-800 placeholder:text-slate-400"
+                className="flex-1 bg-transparent border-none shadow-none focus-visible:outline-none focus:outline-none focus:ring-0 text-[14px] sm:text-[15px] pl-3 sm:pl-4 pr-2 py-2 sm:py-3.5 resize-none h-10 sm:h-12 overflow-y-auto no-scrollbar text-slate-800 placeholder:text-slate-400"
               />
 
               <button
