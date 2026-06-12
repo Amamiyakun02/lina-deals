@@ -515,6 +515,19 @@ export default function App() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Action handler for Product Card buttons
   const handleProductAction = (action: "check_stock" | "view_specs" | "booking", product: Product) => {
     const currentT = translations[lang];
@@ -817,19 +830,58 @@ export default function App() {
           <div className="flex items-center gap-2">
             {/* Auth Button */}
             {user ? (
-              <div className="flex items-center gap-2 mr-1">
-                <div className="hidden sm:flex flex-col items-end">
-                  <span className="text-xs font-black text-slate-800 leading-none">{user.name}</span>
-                  <span className="text-[9px] text-slate-400 font-bold uppercase mt-1 leading-none tracking-wider">{user.role}</span>
-                </div>
+              <div className="relative shrink-0" ref={profileRef}>
+                {/* Profile Avatar Button */}
                 <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-100 hover:border-rose-300 text-rose-600 transition-all duration-300 shadow-sm text-xs font-bold active:scale-95 cursor-pointer group"
-                  title="Logout"
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold shadow-sm shrink-0 select-none cursor-pointer transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500"
                 >
-                  <LogOut className="w-3.5 h-3.5 text-rose-500 group-hover:text-rose-600" />
-                  <span className="hidden md:inline">{t.logoutBtn}</span>
+                  {user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
                 </button>
+
+                {/* Profile Dropdown Popover */}
+                {isProfileOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-slate-100 rounded-2xl shadow-xl p-4 space-y-3.5 z-50 animate-in fade-in slide-in-from-top-2 duration-250">
+                    {/* User Info Header */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-inner shrink-0 bg-indigo-600">
+                        {user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                      </div>
+                      <div className="min-w-0 flex-1 text-left">
+                        <p className="text-xs font-bold text-slate-800 truncate">
+                          {user.name}
+                        </p>
+                        <p className="text-[10px] text-slate-400 truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="border-t border-slate-100" />
+
+                    {/* Role Status Badge */}
+                    <div className="space-y-1 text-left">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block">Role Aktif</span>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100/50 uppercase tracking-wide">
+                        {user.role === "superadmin" ? "🛡️ Superadmin" : user.role === "sales" ? "💼 Sales" : `👤 ${user.role}`}
+                      </span>
+                    </div>
+
+                    <div className="border-t border-slate-100" />
+
+                    {/* Logout Button */}
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsProfileOpen(false);
+                      }}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100/80 rounded-xl transition-all cursor-pointer text-center"
+                    >
+                      <LogOut className="w-3.5 h-3.5 text-rose-500" />
+                      {t.logoutBtn} (Logout)
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <button
@@ -848,12 +900,9 @@ export default function App() {
             <button
               onClick={() => setIsHelpOpen(true)}
               title="Help / Panduan Penggunaan"
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-100/80 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300 shadow-sm group"
+              className="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 bg-slate-100/80 hover:bg-indigo-50 hover:border-indigo-200 transition-all duration-300 shadow-sm group shrink-0"
             >
               <HelpCircle className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-500 transition-colors" />
-              <span className="hidden sm:inline text-[11px] sm:text-xs font-bold text-slate-600 group-hover:text-indigo-600 transition-colors">
-                {lang === "id" ? "Bantuan" : "Help"}
-              </span>
             </button>
 
 
