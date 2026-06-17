@@ -104,10 +104,10 @@ const id: Translations = {
 
   // Welcome message
   welcomeMessage:
-    "Halo! Lina di sini, konsultan smartphone toko Aimer. 👋\n\nLina siap bantu kamu cari gadget terbaik sesuai kebutuhan dan budgetmu! Semua rekomendasi lina selalu berdasarkan produk yang tersedia di toko kita, jadi gak perlu khawatir soal keakuratan datanya ya 😊\n\nMau cari HP apa hari ini?",
+    "Halo! Lina di sini, konsultan gadget & aksesoris toko Aimer. 👋\n\nLina siap bantu kamu cari gadget dan aksesoris terbaik sesuai kebutuhan dan budgetmu! Mulai dari smartphone, tablet, TWS, charger, casing, antigores, sampai smartwatch — semua rekomendasi lina selalu berdasarkan produk yang tersedia di toko kita 😊\n\nMau cari produk apa hari ini?",
 
   // Input
-  inputPlaceholder: "Tanyakan seputar smartphone...",
+  inputPlaceholder: "Tanyakan seputar gadget & aksesoris...",
   attachFile: "Lampirkan File",
 
   // Disclaimer
@@ -128,9 +128,9 @@ const id: Translations = {
     gaming: {
       title: "Rekomendasi HP Gaming",
       description:
-        "Cari smartphone performa tinggi untuk gaming budget di bawah 5 juta.",
+        "Cari gadget performa tinggi untuk gaming budget di bawah 5 juta.",
       prompt:
-        "Bisa rekomendasikan smartphone untuk gaming dengan budget di bawah 5 juta?",
+        "Bisa rekomendasikan HP untuk gaming dengan budget di bawah 5 juta?",
     },
     flagship: {
       title: "Bandingkan Flagship",
@@ -159,7 +159,7 @@ const id: Translations = {
 
   // Help Modal Bilingual
   helpTitle: "Aimer Agent — Panduan Penggunaan",
-  helpIntro: "Halo! Lina di sini, asisten AI Anda. Berikut adalah panduan singkat cara berinteraksi dengan asisten pintar kami:",
+  helpIntro: "Halo! Lina di sini, asisten AI gadget & aksesoris Anda. Berikut adalah panduan singkat cara berinteraksi dengan asisten pintar kami:",
   helpClose: "Mengerti, Tutup Panduan",
   helpFeatures: {
     rec: {
@@ -198,7 +198,7 @@ const id: Translations = {
   landing: {
     slogan: "Cerdas. Personal. Instan.",
     subSlogan: "Asisten Gadget AI Terbaik untuk Anda",
-    description: "Temukan smartphone impian Anda bersama Lina. Dapatkan rekomendasi akurat, cek ketersediaan stok real-time, dan lakukan pemesanan otomatis lewat WhatsApp.",
+    description: "Temukan gadget dan aksesoris impian Anda bersama Lina. Dapatkan rekomendasi akurat, cek ketersediaan stok real-time, dan lakukan pemesanan otomatis lewat WhatsApp.",
     startBtn: "Mulai Konsultasi",
     featuresTitle: "Mengapa Memilih Asisten Aimer?",
     feature1Title: "Konsultasi Cerdas",
@@ -219,10 +219,10 @@ const en: Translations = {
 
   // Welcome message
   welcomeMessage:
-    "Hello! Lina is here, Aimer store's smartphone consultant. 👋\n\nLina is ready to help you find the best gadget that fits your needs and budget! All recommendations from lina are always based on products available in our store, so no need to worry about data accuracy 😊\n\nWhat phone are you looking for today?",
+    "Hello! Lina is here, Aimer store's gadget & accessories consultant. 👋\n\nLina is ready to help you find the best gadgets and accessories that fit your needs and budget! From smartphones, tablets, TWS, chargers, cases, screen protectors, to smartwatches — all recommendations are always based on products available in our store 😊\n\nWhat product are you looking for today?",
 
   // Input
-  inputPlaceholder: "Ask about smartphones...",
+  inputPlaceholder: "Ask about gadgets & accessories...",
   attachFile: "Attach File",
 
   // Disclaimer
@@ -243,9 +243,9 @@ const en: Translations = {
     gaming: {
       title: "Gaming Phone Picks",
       description:
-        "Find high-performance smartphones for gaming under 5 million IDR.",
+        "Find high-performance gadgets for gaming under 5 million IDR.",
       prompt:
-        "Can you recommend a smartphone for gaming with a budget under 5 million IDR?",
+        "Can you recommend a phone for gaming with a budget under 5 million IDR?",
     },
     flagship: {
       title: "Compare Flagships",
@@ -274,12 +274,12 @@ const en: Translations = {
 
   // Help Modal Bilingual
   helpTitle: "Aimer Agent — Usage Guide",
-  helpIntro: "Hello! Lina is here, your AI smartphone assistant. Here is a quick guide on how to interact with our smart agent:",
+  helpIntro: "Hello! Lina is here, your AI gadget & accessories assistant. Here is a quick guide on how to interact with our smart agent:",
   helpClose: "Got it, Close Guide",
   helpFeatures: {
     rec: {
       title: "Gadget Consultation & Recommendations",
-      desc: "Ask for the best smartphone based on your budget, camera, gaming needs, or specific brands. Example: 'Gaming phone recommendation budget 3 million' or 'Compare Samsung S24 with iPhone 15'."
+      desc: "Ask for the best gadget or accessory based on your budget, camera, gaming needs, or specific brands. Example: 'Gaming phone recommendation budget 3 million' or 'Compare Samsung S24 with iPhone 15'."
     },
     card: {
       title: "Interactive Product Cards",
@@ -313,7 +313,7 @@ const en: Translations = {
   landing: {
     slogan: "Smart. Personal. Instant.",
     subSlogan: "Your Ultimate AI Gadget Companion",
-    description: "Find your dream smartphone with Lina. Get accurate recommendations, check real-time stock availability, and reserve devices instantly through WhatsApp.",
+    description: "Find your dream gadget with Lina. Get accurate recommendations, check real-time stock availability, and reserve devices instantly through WhatsApp.",
     startBtn: "Start Consultation",
     featuresTitle: "Why Choose Aimer Assistant?",
     feature1Title: "Intelligent Consultation",

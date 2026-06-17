@@ -133,6 +133,15 @@ interface Message {
   rawText?: string;
 }
 
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  avatar_url?: string;
+}
+
 // ─── Tipe untuk Quick Prompt dari API ─────────────────────────────────────────
 interface QuickPrompt {
   id: string;
@@ -234,15 +243,6 @@ export default function App() {
       return "guest-fallback-" + Date.now();
     }
   });
-
-  interface UserProfile {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    role: string;
-    avatar_url?: string;
-  }
 
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
@@ -932,6 +932,7 @@ export default function App() {
               message={message}
               lang={lang}
               onAction={handleProductAction}
+              user={user}
             />
           ))}
 
@@ -1507,8 +1508,8 @@ export default function App() {
                   <p className="text-[13px] sm:text-base lg:text-[17px] text-slate-500 dark:text-slate-400 mt-0.5 md:mt-3 font-normal leading-relaxed">
                     <span className="md:hidden">
                       {lang === "id" 
-                        ? "Temukan smartphone impian Anda bersama Lina. Dapatkan rekomendasi akurat dan sistem booking WhatsApp otomatis!" 
-                        : "Find your dream smartphone with Lina. Get accurate recommendations and automated WhatsApp booking!"}
+                        ? "Temukan gadget dan aksesoris impian Anda bersama Lina. Dapatkan rekomendasi akurat dan sistem booking WhatsApp otomatis!" 
+                        : "Find your dream gadget with Lina. Get accurate recommendations and automated WhatsApp booking!"}
                     </span>
                     <span className="hidden md:inline">{t.landing.description}</span>
                   </p>
@@ -1621,10 +1622,12 @@ function ChatMessage({
   message,
   lang,
   onAction,
+  user,
 }: {
   message: Message;
   lang: Lang;
   onAction: (action: "check_stock" | "view_specs" | "booking", product: Product) => void;
+  user?: UserProfile | null;
 }) {
   const isUser = message.sender === "user";
   const t = translations[lang];
@@ -1850,8 +1853,19 @@ function ChatMessage({
         {isUser ? (
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br border flex items-center justify-center shadow-lg from-slate-100 to-slate-200 border-slate-300">
             <Avatar className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl">
-              <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" />
-              <AvatarFallback className="bg-transparent font-medium text-xs sm:text-sm text-slate-600">U</AvatarFallback>
+              {user ? (
+                <>
+                  {user.avatar_url && <AvatarImage src={user.avatar_url} />}
+                  <AvatarFallback className="bg-transparent font-medium text-xs sm:text-sm text-slate-600">
+                    {user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                  </AvatarFallback>
+                </>
+              ) : (
+                <>
+                  <AvatarImage src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" />
+                  <AvatarFallback className="bg-transparent font-medium text-xs sm:text-sm text-slate-600">U</AvatarFallback>
+                </>
+              )}
             </Avatar>
           </div>
         ) : (
