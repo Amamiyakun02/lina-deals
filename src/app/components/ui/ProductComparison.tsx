@@ -1,20 +1,23 @@
 import { motion, AnimatePresence } from "motion/react";
-import { X, Scale, Smartphone, Cpu, Camera, Battery, Star, ArrowRight } from "lucide-react";
-import { Product } from "./ProductCard";
+import { X, Scale, Star, ArrowRight } from "lucide-react";
+import { Product, getSpecIcon, getSpecLabel } from "./ProductCard";
 import { cn } from "./utils";
+import { type Lang } from "../../../i18n/translations";
 
 interface ProductComparisonProps {
   products: Product[];
   onRemove: (product: Product) => void;
   onClear: () => void;
   mode: "agent" | "assistant";
+  lang?: Lang;
 }
 
 export default function ProductComparison({
   products,
   onRemove,
   onClear,
-  mode
+  mode,
+  lang = "id"
 }: ProductComparisonProps) {
   const isOpen = products.length > 0;
   const isAgent = mode === "agent";
@@ -193,41 +196,26 @@ export default function ProductComparison({
                   <div className="col-span-4 font-bold">{products[1].rating} <span className="text-[10px] font-medium text-slate-400">({products[1].reviewsCount})</span></div>
                 </div>
 
-                {/* Row: Screen */}
-                <div className="grid grid-cols-12 text-xs items-center py-2 border-t border-slate-50 dark:border-white/[0.02]">
-                  <div className="col-span-4 text-slate-400 font-semibold flex items-center gap-1.5">
-                    <Smartphone className="w-3.5 h-3.5" /> Layar
-                  </div>
-                  <div className="col-span-4 font-medium pr-2 line-clamp-2">{products[0].specs.screen}</div>
-                  <div className="col-span-4 font-medium pr-2 line-clamp-2">{products[1].specs.screen}</div>
-                </div>
-
-                {/* Row: Processor */}
-                <div className="grid grid-cols-12 text-xs items-center py-2 border-t border-slate-50 dark:border-white/[0.02]">
-                  <div className="col-span-4 text-slate-400 font-semibold flex items-center gap-1.5">
-                    <Cpu className="w-3.5 h-3.5" /> Processor
-                  </div>
-                  <div className="col-span-4 font-semibold text-slate-700 dark:text-slate-300 pr-2 line-clamp-2">{products[0].specs.processor}</div>
-                  <div className="col-span-4 font-semibold text-slate-700 dark:text-slate-300 pr-2 line-clamp-2">{products[1].specs.processor}</div>
-                </div>
-
-                {/* Row: Camera */}
-                <div className="grid grid-cols-12 text-xs items-center py-2 border-t border-slate-50 dark:border-white/[0.02]">
-                  <div className="col-span-4 text-slate-400 font-semibold flex items-center gap-1.5">
-                    <Camera className="w-3.5 h-3.5" /> Kamera
-                  </div>
-                  <div className="col-span-4 font-medium pr-2 line-clamp-2">{products[0].specs.camera}</div>
-                  <div className="col-span-4 font-medium pr-2 line-clamp-2">{products[1].specs.camera}</div>
-                </div>
-
-                {/* Row: Battery */}
-                <div className="grid grid-cols-12 text-xs items-center py-2 border-t border-slate-50 dark:border-white/[0.02]">
-                  <div className="col-span-4 text-slate-400 font-semibold flex items-center gap-1.5">
-                    <Battery className="w-3.5 h-3.5" /> Baterai
-                  </div>
-                  <div className="col-span-4 font-medium pr-2 line-clamp-2">{products[0].specs.battery}</div>
-                  <div className="col-span-4 font-medium pr-2 line-clamp-2">{products[1].specs.battery}</div>
-                </div>
+                {/* Dynamic Spec Rows */}
+                {(() => {
+                  const keys = Array.from(new Set([
+                    ...Object.keys(products[0]?.specs || {}),
+                    ...Object.keys(products[1]?.specs || {})
+                  ]));
+                  
+                  return keys.map((key) => {
+                    const Icon = getSpecIcon(key);
+                    return (
+                      <div key={key} className="grid grid-cols-12 text-xs items-center py-2 border-t border-slate-50 dark:border-white/[0.02]">
+                        <div className="col-span-4 text-slate-400 font-semibold flex items-center gap-1.5">
+                          <Icon className="w-3.5 h-3.5" /> {getSpecLabel(key, lang)}
+                        </div>
+                        <div className="col-span-4 font-medium pr-2 line-clamp-2">{products[0].specs[key] || "-"}</div>
+                        <div className="col-span-4 font-medium pr-2 line-clamp-2">{products[1].specs[key] || "-"}</div>
+                      </div>
+                    );
+                  });
+                })()}
 
                 {/* Row: Fitur Unggulan */}
                 <div className="grid grid-cols-12 text-xs items-center py-2.5 border-t border-slate-50 dark:border-white/[0.02]">

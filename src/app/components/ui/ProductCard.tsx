@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Star, Cpu, Smartphone, Camera, Battery, ClipboardCheck, Info } from "lucide-react";
+import { 
+  Star, Cpu, Smartphone, Camera, Battery, ClipboardCheck, Info,
+  Volume2, Disc, Link2, Zap, Layers, Sliders 
+} from "lucide-react";
 import { cn } from "./utils";
 import { translations, type Lang } from "../../../i18n/translations";
 
@@ -11,16 +14,66 @@ export interface Product {
   price: string;
   rating: number;
   reviewsCount: number;
-  specs: {
-    screen: string;
-    processor: string;
-    camera: string;
-    battery: string;
-  };
+  specs: Record<string, string>;
   tags: string[];
   image: string;
   colors: { name: string; hex: string }[];
   link?: string;
+}
+
+export function getSpecIcon(key: string) {
+  const k = key.toLowerCase();
+  if (k.includes("screen") || k.includes("display") || k.includes("layar")) return Smartphone;
+  if (k.includes("processor") || k.includes("cpu") || k.includes("chipset") || k.includes("otak")) return Cpu;
+  if (k.includes("camera") || k.includes("kamera") || k.includes("sensor")) return Camera;
+  if (k.includes("battery") || k.includes("baterai") || k.includes("daya")) return Battery;
+  
+  if (k.includes("driver") || k.includes("speaker") || k.includes("audio") || k.includes("suara")) return Volume2;
+  if (k.includes("anc") || k.includes("noise") || k.includes("peredam")) return Disc;
+  if (k.includes("connection") || k.includes("koneksi") || k.includes("bluetooth") || k.includes("wifi")) return Link2;
+  
+  if (k.includes("capacity") || k.includes("kapasitas") || k.includes("output") || k.includes("charging") || k.includes("watt") || k.includes("power")) return Zap;
+  if (k.includes("material") || k.includes("thickness") || k.includes("tebal") || k.includes("bahan")) return Layers;
+  
+  return Sliders;
+}
+
+export function getSpecLabel(key: string, lang: Lang = "id") {
+  const k = key.toLowerCase();
+  
+  const labelMap: Record<string, { id: string; en: string }> = {
+    screen: { id: "Layar", en: "Screen" },
+    display: { id: "Layar", en: "Display" },
+    layar: { id: "Layar", en: "Screen" },
+    
+    processor: { id: "Prosesor", en: "Processor" },
+    cpu: { id: "Prosesor", en: "CPU" },
+    chipset: { id: "Chipset", en: "Chipset" },
+    
+    camera: { id: "Kamera", en: "Camera" },
+    camera_main: { id: "Kamera Utama", en: "Main Camera" },
+    kamera: { id: "Kamera", en: "Camera" },
+    
+    battery: { id: "Baterai", en: "Battery" },
+    baterai: { id: "Baterai", en: "Battery" },
+    
+    driver: { id: "Driver", en: "Driver" },
+    anc: { id: "Peredam Bising (ANC)", en: "Noise Cancelling (ANC)" },
+    connection: { id: "Koneksi", en: "Connection" },
+    
+    capacity: { id: "Kapasitas", en: "Capacity" },
+    ports: { id: "Port", en: "Ports" },
+    max_output: { id: "Output Maks", en: "Max Output" },
+    material: { id: "Bahan", en: "Material" },
+    thickness: { id: "Ketebalan", en: "Thickness" },
+    features: { id: "Fitur", en: "Features" },
+  };
+
+  if (labelMap[k]) {
+    return lang === "id" ? labelMap[k].id : labelMap[k].en;
+  }
+  
+  return key.charAt(0).toUpperCase() + key.slice(1);
 }
 
 interface ProductCardProps {
@@ -150,22 +203,15 @@ export default function ProductCard({
             "grid grid-cols-2 gap-1.5 sm:gap-2 text-[10px] sm:text-[11px] font-medium py-2 sm:py-3 border-y mb-3 sm:mb-4",
             isAgent ? "border-slate-100 text-slate-600" : "border-white/[0.05] text-slate-400"
           )}>
-            <div className="flex items-center gap-1 sm:gap-1.5">
-              <Smartphone className="w-3 sm:w-3.5 h-3 sm:h-3.5 shrink-0 text-slate-400" />
-              <span className="line-clamp-1" title={product.specs.screen}>{product.specs.screen}</span>
-            </div>
-            <div className="flex items-center gap-1 sm:gap-1.5">
-              <Cpu className="w-3 sm:w-3.5 h-3 sm:h-3.5 shrink-0 text-slate-400" />
-              <span className="line-clamp-1" title={product.specs.processor}>{product.specs.processor}</span>
-            </div>
-            <div className="flex items-center gap-1 sm:gap-1.5">
-              <Camera className="w-3 sm:w-3.5 h-3 sm:h-3.5 shrink-0 text-slate-400" />
-              <span className="line-clamp-1" title={product.specs.camera}>{product.specs.camera}</span>
-            </div>
-            <div className="flex items-center gap-1 sm:gap-1.5">
-              <Battery className="w-3 sm:w-3.5 h-3 sm:h-3.5 shrink-0 text-slate-400" />
-              <span className="line-clamp-1" title={product.specs.battery}>{product.specs.battery}</span>
-            </div>
+            {Object.entries(product.specs || {}).slice(0, 4).map(([key, val]) => {
+              const Icon = getSpecIcon(key);
+              return (
+                <div key={key} className="flex items-center gap-1 sm:gap-1.5">
+                  <Icon className="w-3 sm:w-3.5 h-3 sm:h-3.5 shrink-0 text-slate-400" />
+                  <span className="line-clamp-1" title={`${getSpecLabel(key, lang)}: ${val}`}>{val}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 

@@ -34,12 +34,11 @@ export function parseProductsFromResponse(text: string): Product[] {
         price: String(p.price ?? "Rp 0"),
         rating: Number(p.rating ?? 0),
         reviewsCount: Number(p.reviewsCount ?? 0),
-        specs: {
-          screen: String((p.specs as Record<string, unknown>)?.screen ?? "-"),
-          processor: String((p.specs as Record<string, unknown>)?.processor ?? "-"),
-          camera: String((p.specs as Record<string, unknown>)?.camera ?? "-"),
-          battery: String((p.specs as Record<string, unknown>)?.battery ?? "-"),
-        },
+        specs: typeof p.specs === "object" && p.specs !== null
+          ? Object.fromEntries(
+              Object.entries(p.specs).map(([k, v]) => [k, String(v ?? "-")])
+            )
+          : {},
         tags: Array.isArray(p.tags) ? (p.tags as string[]) : ["Toko Aimer"],
         image: String(p.image ?? `https://placehold.co/300x300/e2e8f0/475569?text=${encodeURIComponent(String(p.name ?? "Produk")).slice(0, 15)}`),
         colors: Array.isArray(p.colors) ? (p.colors as { name: string; hex: string }[]) : [{ name: "Default", hex: "#8E8E93" }],
