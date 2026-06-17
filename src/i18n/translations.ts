@@ -31,7 +31,17 @@ export interface Translations {
       description: string;
       prompt: string;
     };
-    flagship: {
+    compare: {
+      title: string;
+      description: string;
+      prompt: string;
+    };
+    audio: {
+      title: string;
+      description: string;
+      prompt: string;
+    };
+    power: {
       title: string;
       description: string;
       prompt: string;
@@ -126,18 +136,32 @@ const id: Translations = {
   // Quick Prompts
   quickPrompts: {
     gaming: {
-      title: "Rekomendasi HP Gaming",
+      title: "HP Gaming Terbaik",
       description:
-        "Cari gadget performa tinggi untuk gaming budget di bawah 5 juta.",
+        "Cari smartphone performa tinggi untuk gaming budget di bawah 5 juta.",
       prompt:
-        "Bisa rekomendasikan HP untuk gaming dengan budget di bawah 5 juta?",
+        "Bisa rekomendasikan smartphone untuk gaming dengan budget di bawah 5 juta?",
     },
-    flagship: {
-      title: "Bandingkan Flagship",
+    compare: {
+      title: "Bandingkan Gadget",
       description:
-        "Perbandingan spesifikasi antara iPhone 15 Pro dan Samsung Galaxy S24 Ultra.",
+        "Perbandingan spesifikasi antara Samsung Galaxy S24 Ultra dan iPhone 15 Pro.",
       prompt:
-        "Apa perbedaan spesifikasi dan keunggulan antara iPhone 15 Pro dengan Samsung Galaxy S24 Ultra?",
+        "Apa perbedaan spesifikasi dan keunggulan antara Samsung Galaxy S24 Ultra dengan iPhone 15 Pro?",
+    },
+    audio: {
+      title: "TWS & Audio Murah",
+      description:
+        "Cari TWS / Earbuds bluetooth terbaik dengan budget di bawah 1 juta.",
+      prompt:
+        "Rekomendasikan TWS atau earbuds bluetooth dengan kualitas suara bagus di bawah 1 juta rupiah.",
+    },
+    power: {
+      title: "Charger & Powerbank",
+      description:
+        "Cari charger cepat GaN atau powerbank berkapasitas besar.",
+      prompt:
+        "Tampilkan rekomendasi charger fast charging GaN dan powerbank yang bagus di toko.",
     },
   },
 
@@ -241,18 +265,32 @@ const en: Translations = {
   // Quick Prompts
   quickPrompts: {
     gaming: {
-      title: "Gaming Phone Picks",
+      title: "Best Gaming Phones",
       description:
-        "Find high-performance gadgets for gaming under 5 million IDR.",
+        "Find high-performance smartphones for gaming under 5 million IDR.",
       prompt:
-        "Can you recommend a phone for gaming with a budget under 5 million IDR?",
+        "Can you recommend a smartphone for gaming with a budget under 5 million IDR?",
     },
-    flagship: {
-      title: "Compare Flagships",
+    compare: {
+      title: "Compare Gadgets",
       description:
-        "Compare specs between iPhone 15 Pro and Samsung Galaxy S24 Ultra.",
+        "Compare specs between Samsung Galaxy S24 Ultra and iPhone 15 Pro.",
       prompt:
-        "What are the spec differences and advantages between iPhone 15 Pro and Samsung Galaxy S24 Ultra?",
+        "What are the spec differences and advantages between Samsung Galaxy S24 Ultra and iPhone 15 Pro?",
+    },
+    audio: {
+      title: "TWS & Audio Picks",
+      description:
+        "Find the best bluetooth TWS / Earbuds under 1 million IDR.",
+      prompt:
+        "Recommend some good sound quality bluetooth TWS or earbuds under 1 million IDR.",
+    },
+    power: {
+      title: "Chargers & Powerbanks",
+      description:
+        "Find fast-charging GaN chargers or high-capacity powerbanks.",
+      prompt:
+        "Show some recommendations for fast charging GaN chargers and reliable powerbanks in the store.",
     },
   },
 

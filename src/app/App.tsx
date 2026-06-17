@@ -182,12 +182,28 @@ function buildFallbackPrompts(currentLang: Lang): QuickPrompt[] {
       color: "indigo",
     },
     {
-      id: "flagship",
+      id: "compare",
       icon: "⚖️",
-      title: translations[currentLang].quickPrompts.flagship.title,
-      description: translations[currentLang].quickPrompts.flagship.description,
-      prompt: translations[currentLang].quickPrompts.flagship.prompt,
+      title: translations[currentLang].quickPrompts.compare.title,
+      description: translations[currentLang].quickPrompts.compare.description,
+      prompt: translations[currentLang].quickPrompts.compare.prompt,
       color: "emerald",
+    },
+    {
+      id: "audio",
+      icon: "🎧",
+      title: translations[currentLang].quickPrompts.audio.title,
+      description: translations[currentLang].quickPrompts.audio.description,
+      prompt: translations[currentLang].quickPrompts.audio.prompt,
+      color: "violet",
+    },
+    {
+      id: "power",
+      icon: "⚡",
+      title: translations[currentLang].quickPrompts.power.title,
+      description: translations[currentLang].quickPrompts.power.description,
+      prompt: translations[currentLang].quickPrompts.power.prompt,
+      color: "rose",
     },
   ];
 }
