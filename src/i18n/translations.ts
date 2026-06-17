@@ -110,11 +110,11 @@ export interface Translations {
 const id: Translations = {
   // Header
   agentOnline: "Agent Online",
-  brandName: "Agent IRIN Cell",
+  brandName: "IRIN Celluler",
 
   // Welcome message
   welcomeMessage:
-    "Halo! Lina di sini, konsultan gadget & aksesoris toko Agent IRIN Cell. 👋\n\nLina siap bantu kamu cari gadget dan aksesoris terbaik sesuai kebutuhan dan budgetmu! Mulai dari smartphone, tablet, TWS, charger, casing, antigores, sampai smartwatch — semua rekomendasi lina selalu berdasarkan produk yang tersedia di toko kita 😊\n\nMau cari produk apa hari ini?",
+    "Halo! Lina di sini, konsultan gadget & aksesoris toko IRIN Celluler. 👋\n\nLina siap bantu kamu cari gadget dan aksesoris terbaik sesuai kebutuhan dan budgetmu! Mulai dari smartphone, tablet, TWS, charger, casing, antigores, sampai smartwatch — semua rekomendasi lina selalu berdasarkan produk yang tersedia di toko kita 😊\n\nMau cari produk apa hari ini?",
 
   // Input
   inputPlaceholder: "Tanyakan seputar gadget & aksesoris...",
@@ -166,7 +166,7 @@ const id: Translations = {
   },
 
   // Error
-  connectionError: "Koneksi ke sistem **Agent IRIN Cell** gagal. Coba lagi dalam beberapa saat.",
+  connectionError: "Koneksi ke sistem **IRIN Celluler Agent** gagal. Coba lagi dalam beberapa saat.",
 
   // Language toggle
   langToggleLabel: "EN",
@@ -182,7 +182,7 @@ const id: Translations = {
   bookingPrompt: (productName) => `Bisa tolong booking produk **${productName}** untuk saya?`,
 
   // Help Modal Bilingual
-  helpTitle: "Agent IRIN Cell — Panduan Penggunaan",
+  helpTitle: "IRIN Celluler Agent — Panduan Penggunaan",
   helpIntro: "Halo! Lina di sini, asisten AI gadget & aksesoris Anda. Berikut adalah panduan singkat cara berinteraksi dengan asisten pintar kami:",
   helpClose: "Mengerti, Tutup Panduan",
   helpFeatures: {
@@ -206,7 +206,7 @@ const id: Translations = {
   loginBtn: "Masuk",
   registerBtn: "Daftar",
   logoutBtn: "Keluar",
-  loginTitle: "Masuk ke Agent IRIN Cell",
+  loginTitle: "Masuk ke IRIN Celluler",
   registerTitle: "Daftar Akun Member",
   emailLabel: "Alamat Email",
   passwordLabel: "Kata Sandi",
@@ -224,7 +224,7 @@ const id: Translations = {
     subSlogan: "Asisten Gadget AI Terbaik untuk Anda",
     description: "Temukan gadget dan aksesoris impian Anda bersama Lina. Dapatkan rekomendasi akurat, cek ketersediaan stok real-time, dan lakukan pemesanan otomatis lewat WhatsApp.",
     startBtn: "Mulai Konsultasi",
-    featuresTitle: "Mengapa Memilih Asisten Agent IRIN Cell?",
+    featuresTitle: "Mengapa Memilih Asisten IRIN Celluler?",
     feature1Title: "Konsultasi Cerdas",
     feature1Desc: "Rekomendasi HP terbaik sesuai budget, spesifikasi, dan kebutuhan Anda secara akurat.",
     feature2Title: "Cek Stok Real-Time",
@@ -239,11 +239,11 @@ const id: Translations = {
 const en: Translations = {
   // Header
   agentOnline: "Agent Online",
-  brandName: "Agent IRIN Cell",
+  brandName: "IRIN Celluler",
 
   // Welcome message
   welcomeMessage:
-    "Hello! Lina is here, Agent IRIN Cell store's gadget & accessories consultant. 👋\n\nLina is ready to help you find the best gadgets and accessories that fit your needs and budget! From smartphones, tablets, TWS, chargers, cases, screen protectors, to smartwatches — all recommendations are always based on products available in our store 😊\n\nWhat product are you looking for today?",
+    "Hello! Lina is here, IRIN Celluler store's gadget & accessories consultant. 👋\n\nLina is ready to help you find the best gadgets and accessories that fit your needs and budget! From smartphones, tablets, TWS, chargers, cases, screen protectors, to smartwatches — all recommendations are always based on products available in our store 😊\n\nWhat product are you looking for today?",
 
   // Input
   inputPlaceholder: "Ask about gadgets & accessories...",
@@ -295,7 +295,7 @@ const en: Translations = {
   },
 
   // Error
-  connectionError: "Connection to **Agent IRIN Cell** failed. Please try again in a moment.",
+  connectionError: "Connection to **IRIN Celluler Agent** failed. Please try again in a moment.",
 
   // Language toggle
   langToggleLabel: "ID",
@@ -311,7 +311,7 @@ const en: Translations = {
   bookingPrompt: (productName) => `Could you please book the **${productName}** product for me?`,
 
   // Help Modal Bilingual
-  helpTitle: "Agent IRIN Cell — Usage Guide",
+  helpTitle: "IRIN Celluler Agent — Usage Guide",
   helpIntro: "Hello! Lina is here, your AI gadget & accessories assistant. Here is a quick guide on how to interact with our smart agent:",
   helpClose: "Got it, Close Guide",
   helpFeatures: {
@@ -335,7 +335,7 @@ const en: Translations = {
   loginBtn: "Sign In",
   registerBtn: "Sign Up",
   logoutBtn: "Sign Out",
-  loginTitle: "Sign In to Agent IRIN Cell",
+  loginTitle: "Sign In to IRIN Celluler",
   registerTitle: "Register Member Account",
   emailLabel: "Email Address",
   passwordLabel: "Password",
@@ -353,7 +353,7 @@ const en: Translations = {
     subSlogan: "Your Ultimate AI Gadget Companion",
     description: "Find your dream gadget with Lina. Get accurate recommendations, check real-time stock availability, and reserve devices instantly through WhatsApp.",
     startBtn: "Start Consultation",
-    featuresTitle: "Why Choose Agent IRIN Cell Assistant?",
+    featuresTitle: "Why Choose IRIN Celluler Assistant?",
     feature1Title: "Intelligent Consultation",
     feature1Desc: "Accurate phone recommendations tailored to your budget, specs, and specific needs.",
     feature2Title: "Real-Time Stock Check",
