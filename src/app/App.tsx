@@ -292,7 +292,7 @@ export default function App() {
     setAuthLoading(true);
 
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+    const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
     const endpoint = authMode === "login" ? `${baseUrl}/v1/auth/login` : `${baseUrl}/v1/auth/register`;
 
     try {
@@ -366,7 +366,7 @@ export default function App() {
     setAuthLoading(true);
 
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+    const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
 
     // Safety timeout fallback
     const safetyTimeout = setTimeout(() => {
@@ -439,7 +439,7 @@ export default function App() {
     setCompleteProfileLoading(true);
 
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+    const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
 
     try {
       if (!user) {
@@ -491,7 +491,7 @@ export default function App() {
     setQuickPrompts(buildFallbackPrompts(lang));
 
     const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+    const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
     fetch(`${baseUrl}/v1/agent/quick-prompts?lang=${lang}`)
       .then(res => res.ok ? res.json() : Promise.reject(res.status))
       .then(data => {
@@ -592,7 +592,7 @@ export default function App() {
 
     try {
       const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-      const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+      const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
       const endpoint = `${baseUrl}/v1/agent/chat`;
 
       const token = localStorage.getItem("irin-auth-token");
@@ -719,7 +719,7 @@ export default function App() {
 
           try {
             const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-            const baseUrl = isLocal ? "http://localhost:8000" : "https://myagentic-apps.fastapicloud.dev";
+            const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
 
             const batchResponse = await fetch(`${baseUrl}/v1/products/batch?ids=${productIds.join(",")}`);
             if (batchResponse.ok) {
