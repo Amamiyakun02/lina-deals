@@ -846,7 +846,7 @@ export default function App() {
         </div>
 
         {/* Agent Header */}
-        <header className="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white/70 backdrop-blur-md">
+        <header className="relative z-20 px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white/70 backdrop-blur-md">
           {/* Brand */}
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-50 border border-indigo-200 shadow-[0_0_15px_rgba(99,102,241,0.1)] overflow-hidden">
