@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Send, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu, Download } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, lazy, Suspense } from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { motion } from "motion/react";
@@ -9,6 +10,7 @@ import ProductCard, { Product } from "./components/ui/ProductCard";
 import { cn } from "./components/ui/utils";
 import { translations, type Lang } from "../i18n/translations";
 import { auth, googleProvider } from "./utils/firebase";
+const ProductCatalog = lazy(() => import("./components/ProductCatalog"));
 import { signInWithPopup } from "firebase/auth";
 
 // ─── Parse [PRODUCTS:{...}] dari response agent ─────────────────────────────
@@ -221,6 +223,12 @@ export default function App() {
 
   const t = translations[lang];
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const activeTab = location.pathname === "/catalog" ? "catalog" : "chat";
+  const setActiveTab = (tab: "chat" | "catalog") => {
+    navigate(tab === "catalog" ? "/catalog" : "/");
+  };
   const [isLandingOpen, setIsLandingOpen] = useState<boolean>(() => {
     try {
       const saved = sessionStorage.getItem("irin-landing-dismissed");
@@ -554,6 +562,13 @@ export default function App() {
     }
   };
 
+  const handleCatalogProductAction = (action: "check_stock" | "view_specs" | "booking", product: Product) => {
+    setActiveTab("chat");
+    setTimeout(() => {
+      handleProductAction(action, product);
+    }, 100);
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
@@ -807,8 +822,31 @@ export default function App() {
       {/* Main Chat App Container */}
       <div className="relative z-10 w-full max-w-4xl h-screen flex flex-col backdrop-blur-3xl border-x shadow-2xl bg-white/60 border-slate-200/50 shadow-[0_0_40px_rgba(0,0,0,0.05)]">
 
-        {/* Header */}
-        <header className="px-4 py-3 sm:px-6 sm:py-5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white/50">
+        {/* IRIN Cellular Store Header */}
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between shrink-0 relative overflow-hidden border-b border-indigo-900/50">
+          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-400 via-transparent to-transparent"></div>
+          <div className="relative z-10 flex items-center gap-3 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.4)] flex items-center justify-center border border-indigo-400/50">
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-white font-extrabold text-base sm:text-xl tracking-tight flex items-center gap-2">
+                IRIN Cellular
+                <span className="bg-indigo-500/30 text-indigo-200 text-[10px] px-2 py-0.5 rounded-full border border-indigo-500/30 hidden sm:inline-flex shadow-sm">Official</span>
+              </h1>
+              <p className="text-indigo-200/80 text-[10px] sm:text-xs font-medium tracking-wide">Premium Gadget & Authorized Reseller</p>
+            </div>
+          </div>
+          <div className="hidden sm:flex relative z-10 items-center gap-4 text-indigo-100 text-xs font-semibold">
+            <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/10 shadow-inner">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+              Toko Buka
+            </div>
+          </div>
+        </div>
+
+        {/* Agent Header */}
+        <header className="px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white/70 backdrop-blur-md">
           {/* Brand */}
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-50 border border-indigo-200 shadow-[0_0_15px_rgba(99,102,241,0.1)] overflow-hidden">
@@ -936,132 +974,217 @@ export default function App() {
           </div>
         </header>
 
-        {/* Chat Area */}
-        <div
-          className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-8 space-y-6 sm:space-y-8 scroll-smooth"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
-        >
-          {messages.map((message) => (
-            <ChatMessage
-              key={message.id}
-              message={message}
-              lang={lang}
-              onAction={handleProductAction}
-              user={user}
-            />
-          ))}
-
-          {/* Quick Prompts — shown only when only welcome message visible */}
-          {messages.length === 1 && !isLoading && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2"
+        {/* Tab Navigation */}
+        <div className="px-4 py-2 border-b border-slate-200 bg-white/30 backdrop-blur-md shrink-0 flex gap-2">
+          {/* iOS-Style Sliding Active Pill */}
+          <div className="flex-1 flex relative bg-slate-100/70 p-1 rounded-2xl border border-slate-200/50">
+            <button
+              onClick={() => setActiveTab("chat")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold relative z-10 transition-colors duration-300 cursor-pointer focus:outline-none",
+                activeTab === "chat" ? "text-white" : "text-slate-600 hover:text-slate-800"
+              )}
             >
-              {quickPrompts.slice(0, 4).map((qp, idx) => {
-                const colorKey = qp.color in PROMPT_COLORS ? qp.color : "indigo";
-                const cardCls = PROMPT_COLORS[colorKey];
-                const iconCls = ICON_COLORS[colorKey] ?? ICON_COLORS.indigo;
-                return (
-                  <motion.button
-                    key={qp.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 + idx * 0.08 }}
-                    onClick={() => handleSendMessage(qp.prompt)}
-                    className={`text-left px-5 py-4 rounded-2xl bg-gradient-to-br transition-all duration-300 group border ${cardCls}`}
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`p-2 rounded-lg group-hover:scale-110 transition-transform ${iconCls}`}>
-                        {qp.icon}
-                      </div>
-                      <span className="font-semibold text-sm text-slate-800">
-                        {qp.title}
-                      </span>
-                    </div>
-                    <p className="text-xs leading-relaxed text-slate-600">
-                      {qp.description}
-                    </p>
-                  </motion.button>
-                );
-              })}
-            </motion.div>
-          )}
-
-          {/* Loading Indicator */}
-          {isLoading && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-start gap-4 max-w-[80%]"
+              {activeTab === "chat" && (
+                <motion.div
+                  layoutId="activeTabBackground"
+                  className="absolute inset-0 bg-indigo-600 rounded-xl shadow-md -z-10"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>{t.chatTab}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("catalog")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold relative z-10 transition-colors duration-300 cursor-pointer focus:outline-none",
+                activeTab === "catalog" ? "text-white" : "text-slate-600 hover:text-slate-800"
+              )}
             >
-              <div className="flex-shrink-0 mt-1">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-100 border-indigo-200 to-slate-50 border flex items-center justify-center shadow-lg overflow-hidden">
-                  <Avatar className="w-full h-full rounded-none">
-                    <AvatarImage src="/images/Lina.png" className="object-cover" />
-                    <AvatarFallback className="bg-transparent rounded-none">
-                      <Sparkles className="w-5 h-5 text-indigo-600" />
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-              </div>
-              <div className="px-5 py-4 rounded-2xl rounded-tl-none border shadow-xl backdrop-blur-md flex items-center gap-3 h-[52px] bg-white border-indigo-100 shadow-sm">
-                <div className="flex items-center gap-1.5 px-1 py-1">
-                  <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-2 h-2 bg-indigo-400 rounded-full" />
-                  <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-2 h-2 bg-indigo-400 rounded-full" />
-                  <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-2 h-2 bg-indigo-400 rounded-full" />
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          <div ref={messagesEndRef} className="h-4" />
-        </div>
-
-        {/* Input Area */}
-        <div className="px-3 sm:px-6 pb-2 pt-1 sm:pb-3 sm:pt-2 shrink-0 bg-gradient-to-t from-white/80 to-transparent">
-          <div className="relative group">
-            {/* Glow effect behind input */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-200/50 via-purple-200/50 to-indigo-200/50 rounded-[24px] blur-md opacity-70 group-focus-within:opacity-100 transition duration-500" />
-
-            <div className="relative flex items-center gap-1.5 sm:gap-3 backdrop-blur-xl border rounded-[20px] p-1.5 sm:p-2 shadow-2xl transition-all duration-300 bg-white/90 border-slate-200 focus-within:border-indigo-400 focus-within:bg-white">
-              <textarea
-                ref={inputRef}
-                value={inputMessage}
-                onChange={(e) => {
-                  setInputMessage(e.target.value);
-                  if (inputRef.current) {
-                    inputRef.current.style.height = "auto";
-                    inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`;
-                  }
-                }}
-                onKeyDown={handleKeyDown}
-                placeholder={t.inputPlaceholder}
-                rows={1}
-                className="flex-1 bg-transparent border-none shadow-none focus-visible:outline-none focus:outline-none focus:ring-0 text-[14px] sm:text-[15px] pl-3 sm:pl-4 pr-2 py-2 sm:py-3.5 resize-none h-10 sm:h-12 overflow-y-auto no-scrollbar text-slate-800 placeholder:text-slate-400"
-              />
-
-              <button
-                id="send-message-btn"
-                onClick={handleSendMessage}
-                disabled={!inputMessage.trim() || isLoading}
-                className={`p-2.5 sm:p-3.5 rounded-xl flex items-center justify-center transition-all duration-300 ${inputMessage.trim() && !isLoading
-                  ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_20px_rgba(79,70,229,0.5)] hover:scale-105 active:scale-95"
-                  : "bg-slate-100 text-slate-400 cursor-not-allowed"
-                  }`}
-              >
-                <Send className="w-5 h-5 ml-0.5" />
-              </button>
-            </div>
-
-            <div className="text-center mt-1.5 sm:mt-3.5">
-              <span className="text-[10px] sm:text-[11px] text-slate-500/70 font-medium tracking-wide leading-tight sm:leading-normal">
-                {t.disclaimer}
-              </span>
-            </div>
+              {activeTab === "catalog" && (
+                <motion.div
+                  layoutId="activeTabBackground"
+                  className="absolute inset-0 bg-indigo-600 rounded-xl shadow-md -z-10"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>{t.catalogTab}</span>
+            </button>
           </div>
         </div>
+
+        {/* Tab Content Wrapper with Transition Animation */}
+        <div className="flex-1 flex flex-col min-h-0 relative overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="flex-1 flex flex-col min-h-0 w-full"
+          >
+            <>
+              {/* Chat Area Container - visually toggled */}
+              <div className={`flex-1 flex flex-col min-h-0 w-full ${activeTab === "chat" ? "flex" : "hidden"}`}>
+                {/* Chat Area */}
+                <div
+                  className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 sm:py-8 space-y-6 sm:space-y-8 scroll-smooth"
+                  style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+                >
+                  {messages.map((message) => (
+                    <ChatMessage
+                      key={message.id}
+                      message={message}
+                      lang={lang}
+                      onAction={handleProductAction}
+                      user={user}
+                    />
+                  ))}
+
+                  {/* Quick Prompts — shown only when only welcome message visible */}
+                  {messages.length === 1 && !isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2"
+                    >
+                      {quickPrompts.slice(0, 4).map((qp, idx) => {
+                        const colorKey = qp.color in PROMPT_COLORS ? qp.color : "indigo";
+                        const cardCls = PROMPT_COLORS[colorKey];
+                        const iconCls = ICON_COLORS[colorKey] ?? ICON_COLORS.indigo;
+                        return (
+                          <motion.button
+                            key={qp.id}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 + idx * 0.08 }}
+                            onClick={() => handleSendMessage(qp.prompt)}
+                            className={`text-left px-5 py-4 rounded-2xl bg-gradient-to-br transition-all duration-300 group border ${cardCls}`}
+                          >
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className={`p-2 rounded-lg group-hover:scale-110 transition-transform ${iconCls}`}>
+                                {qp.icon}
+                              </div>
+                              <span className="font-semibold text-sm text-slate-800">
+                                {qp.title}
+                              </span>
+                            </div>
+                            <p className="text-xs leading-relaxed text-slate-600">
+                              {qp.description}
+                            </p>
+                          </motion.button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+
+                  {/* Loading Indicator */}
+                  {isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-start gap-4 max-w-[80%]"
+                    >
+                      <div className="flex-shrink-0 mt-1">
+                        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-100 border-indigo-200 to-slate-50 border flex items-center justify-center shadow-lg overflow-hidden">
+                          <Avatar className="w-full h-full rounded-none">
+                            <AvatarImage src="/images/Lina.png" className="object-cover" />
+                            <AvatarFallback className="bg-transparent rounded-none">
+                              <Sparkles className="w-5 h-5 text-indigo-600" />
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
+                      </div>
+                      <div className="px-5 py-4 rounded-2xl rounded-tl-none border shadow-xl backdrop-blur-md flex items-center gap-3 h-[52px] bg-white border-indigo-100 shadow-sm">
+                        <div className="flex items-center gap-1.5 px-1 py-1">
+                          <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-2 h-2 bg-indigo-400 rounded-full" />
+                          <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-2 h-2 bg-indigo-400 rounded-full" />
+                          <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-2 h-2 bg-indigo-400 rounded-full" />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  <div ref={messagesEndRef} className="h-4" />
+                </div>
+
+                {/* Input Area */}
+                <div className="px-3 sm:px-6 pb-2 pt-1 sm:pb-3 sm:pt-2 shrink-0 bg-gradient-to-t from-white/80 to-transparent">
+                  <div className="relative group">
+                    {/* Glow effect behind input */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-200/50 via-purple-200/50 to-indigo-200/50 rounded-[24px] blur-md opacity-70 group-focus-within:opacity-100 transition duration-500" />
+
+                    <div className="relative flex items-center gap-1.5 sm:gap-3 backdrop-blur-xl border rounded-[20px] p-1.5 sm:p-2 shadow-2xl transition-all duration-300 bg-white/90 border-slate-200 focus-within:border-indigo-400 focus-within:bg-white">
+                      <textarea
+                        ref={inputRef}
+                        value={inputMessage}
+                        onChange={(e) => {
+                          setInputMessage(e.target.value);
+                          if (inputRef.current) {
+                            inputRef.current.style.height = "auto";
+                            inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`;
+                          }
+                        }}
+                        onKeyDown={handleKeyDown}
+                        placeholder={t.inputPlaceholder}
+                        rows={1}
+                        className="flex-1 bg-transparent border-none shadow-none focus-visible:outline-none focus:outline-none focus:ring-0 text-[14px] sm:text-[15px] pl-3 sm:pl-4 pr-2 py-2 sm:py-3.5 resize-none h-10 sm:h-12 overflow-y-auto no-scrollbar text-slate-800 placeholder:text-slate-400"
+                      />
+
+                      <button
+                        id="send-message-btn"
+                        onClick={handleSendMessage}
+                        disabled={!inputMessage.trim() || isLoading}
+                        className={`p-2.5 sm:p-3.5 rounded-xl flex items-center justify-center transition-all duration-300 ${inputMessage.trim() && !isLoading
+                          ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_20px_rgba(79,70,229,0.5)] hover:scale-105 active:scale-95"
+                          : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                          }`}
+                      >
+                        <Send className="w-5 h-5 ml-0.5" />
+                      </button>
+                    </div>
+
+                    <div className="text-center mt-1.5 sm:mt-3.5">
+                      <span className="text-[10px] sm:text-[11px] text-slate-500/70 font-medium tracking-wide leading-tight sm:leading-normal">
+                        {t.disclaimer}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Catalog Area Container - visually toggled */}
+              <div className={`flex-1 flex flex-col min-h-0 w-full ${activeTab === "catalog" ? "flex" : "hidden"}`}>
+                <Suspense fallback={
+                <div className="flex items-center justify-center h-full min-h-[400px]">
+                  <div className="flex flex-col items-center">
+                    <div className="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                    <p className="mt-4 text-slate-500 font-medium">Memuat Katalog...</p>
+                  </div>
+                </div>
+              }>
+                  <ProductCatalog lang={lang} onProductAction={handleCatalogProductAction} isActive={activeTab === "catalog"} />
+                </Suspense>
+              </div>
+            </>
+          </motion.div>
+        </div>
+
+        {/* Thin Footer for IRIN Cellular */}
+        <footer className="shrink-0 border-t border-slate-200 bg-white/80 backdrop-blur-md px-4 py-2 flex flex-col sm:flex-row items-center justify-between gap-1 sm:gap-4 z-50 text-[10px] sm:text-xs text-slate-500 font-medium">
+          <div className="flex items-center gap-1.5">
+            <span className="font-bold text-indigo-700">© {new Date().getFullYear()} IRIN Cellular.</span>
+            <span>All rights reserved.</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <a href="#" className="hover:text-indigo-600 transition-colors">Syarat & Ketentuan</a>
+            <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+            <a href="#" className="hover:text-indigo-600 transition-colors">Kebijakan Privasi</a>
+            <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-slate-300"></span>
+            <span className="hidden sm:flex items-center gap-1"><Sparkles className="w-3 h-3 text-amber-500" /> Authorized Store</span>
+          </div>
+        </footer>
       </div>
 
       {/* ============================================================

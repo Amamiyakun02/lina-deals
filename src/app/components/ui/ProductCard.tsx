@@ -99,7 +99,7 @@ export default function ProductCard({
       whileHover={{ y: -6 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       className={cn(
-        "relative flex flex-col w-[260px] sm:w-[290px] shrink-0 rounded-2xl border overflow-hidden backdrop-blur-md transition-all duration-500 shadow-lg",
+        "relative flex flex-col w-full max-w-[280px] sm:max-w-[290px] shrink-0 rounded-2xl border overflow-hidden backdrop-blur-md transition-all duration-500 shadow-lg",
         isAgent
           ? "bg-white/70 border-indigo-100 hover:border-indigo-300 hover:shadow-indigo-100/40"
           : "bg-slate-900/70 border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-emerald-950/50"

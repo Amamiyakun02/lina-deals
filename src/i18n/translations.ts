@@ -105,6 +105,20 @@ export interface Translations {
     quickStartTitle: string;
     resetLandingBtn: string;
   };
+  chatTab: string;
+  catalogTab: string;
+  searchPlaceholder: string;
+  filterAll: string;
+  filterSmartphones: string;
+  filterAccessories: string;
+  filterCategory: string;
+  filterBrand: string;
+  brandAll: string;
+  priceRange: string;
+  sortBy: string;
+  priceLowHigh: string;
+  priceHighLow: string;
+  noProductsFound: string;
 }
 
 const id: Translations = {
@@ -233,7 +247,21 @@ const id: Translations = {
     feature3Desc: "Reservasi produk secara otomatis dengan konfirmasi langsung ke nomor WhatsApp Anda.",
     quickStartTitle: "Atau Mulai dengan Topik Berikut:",
     resetLandingBtn: "Panduan Awal"
-  }
+  },
+  chatTab: "Konsultasi AI",
+  catalogTab: "Katalog Produk",
+  searchPlaceholder: "Cari nama atau merek produk...",
+  filterAll: "Semua",
+  filterSmartphones: "Smartphone",
+  filterAccessories: "Aksesoris",
+  filterCategory: "Kategori",
+  filterBrand: "Merek",
+  brandAll: "Semua Merek",
+  priceRange: "Rentang Harga",
+  sortBy: "Urutkan",
+  priceLowHigh: "Harga: Rendah ke Tinggi",
+  priceHighLow: "Harga: Tinggi ke Rendah",
+  noProductsFound: "Produk tidak ditemukan."
 };
 
 const en: Translations = {
@@ -362,7 +390,21 @@ const en: Translations = {
     feature3Desc: "Automatically reserve products with instant confirmation sent to your WhatsApp.",
     quickStartTitle: "Or Start with These Topics:",
     resetLandingBtn: "Intro Guide"
-  }
+  },
+  chatTab: "AI Chat",
+  catalogTab: "Product Catalog",
+  searchPlaceholder: "Search product name or brand...",
+  filterAll: "All",
+  filterSmartphones: "Smartphones",
+  filterAccessories: "Accessories",
+  filterCategory: "Category",
+  filterBrand: "Brand",
+  brandAll: "All Brands",
+  priceRange: "Price Range",
+  sortBy: "Sort By",
+  priceLowHigh: "Price: Low to High",
+  priceHighLow: "Price: High to Low",
+  noProductsFound: "No products found."
 };
 
 export const translations: Record<Lang, Translations> = { id, en };
