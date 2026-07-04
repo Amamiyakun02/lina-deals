@@ -1314,99 +1314,22 @@ export default function App() {
               </div>
             )}
 
-            {/* Form */}
-            <form onSubmit={handleAuthSubmit} className="space-y-4">
-              {authMode === "register" && (
-                <>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-600">{t.nameLabel}</label>
-                    <input
-                      type="text"
-                      required
-                      value={authName}
-                      onChange={(e) => setAuthName(e.target.value)}
-                      className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
-                      placeholder="e.g. Amamiya Kun"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-600">{t.phoneLabel}</label>
-                    <input
-                      type="tel"
-                      required
-                      value={authPhone}
-                      onChange={(e) => setAuthPhone(e.target.value)}
-                      className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
-                      placeholder="e.g. 08123456789"
-                    />
-                  </div>
-                </>
-              )}
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600">{t.emailLabel}</label>
-                <input
-                  type="email"
-                  required
-                  value={authEmail}
-                  onChange={(e) => setAuthEmail(e.target.value)}
-                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
-                  placeholder="name@email.com"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-600">{t.passwordLabel}</label>
-                <input
-                  type="password"
-                  required
-                  value={authPassword}
-                  onChange={(e) => setAuthPassword(e.target.value)}
-                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
-                  placeholder="••••••••"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={authLoading}
-                className="w-full h-11 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
-              >
-                {authLoading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : authMode === "login" ? t.submitLogin : t.submitRegister}
-              </button>
-            </form>
-
-            {/* Premium Google OAuth Divider */}
-            <div className="my-4 flex items-center justify-between gap-3">
-              <span className="h-[1px] w-full bg-slate-200 dark:bg-white/10" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 select-none px-1">{t.orDivider}</span>
-              <span className="h-[1px] w-full bg-slate-200 dark:bg-white/10" />
-            </div>
-
             {/* Google Sign-In Button Container */}
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={authLoading}
-              className="w-full flex justify-center items-center gap-3 h-[46px] rounded-xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 active:scale-[0.98] cursor-pointer"
-            >
-              <img src="/google.svg" alt="Google" className="w-5 h-5 object-contain" />
-              <span className="text-sm font-bold text-slate-700">{t.loginBtn} {lang === "id" ? "dengan Google" : "with Google"}</span>
-            </button>
-
-            {/* Toggle Mode Link */}
-            <div className="mt-6 text-center border-t border-indigo-50/50 pt-4">
+            <div className="mt-2 mb-4">
               <button
                 type="button"
-                onClick={() => {
-                  setAuthMode(authMode === "login" ? "register" : "login");
-                  setAuthError("");
-                }}
-                className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 hover:underline transition cursor-pointer"
+                onClick={handleGoogleLogin}
+                disabled={authLoading}
+                className="w-full flex justify-center items-center gap-3 h-[46px] rounded-xl border border-slate-200 bg-white shadow-sm transition hover:bg-slate-50 active:scale-[0.98] cursor-pointer"
               >
-                {authMode === "login" ? t.switchToRegister : t.switchToLogin}
+                {authLoading ? (
+                  <div className="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <img src="/google.svg" alt="Google" className="w-5 h-5 object-contain" />
+                    <span className="text-sm font-bold text-slate-700">{t.loginBtn} {lang === "id" ? "dengan Google" : "with Google"}</span>
+                  </>
+                )}
               </button>
             </div>
           </motion.div>
