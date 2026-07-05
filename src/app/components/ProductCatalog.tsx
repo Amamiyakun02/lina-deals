@@ -56,12 +56,7 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
   // Debounced search query to limit API calls
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
 
-  // Dynamically extract unique brands for filter dropdown
-  const uniqueBrands = useMemo(() => {
-    const brands = new Set<string>();
-    STATIC_PRODUCTS.forEach(p => brands.add(p.brand));
-    return Array.from(brands);
-  }, []);
+  const [availableBrands, setAvailableBrands] = useState<string[]>([]);
 
   // Track previous filters to determine if we should show skeleton loading
   const prevFiltersRef = useRef({ debouncedSearch, selectedCategory, selectedBrand, sortBy });
@@ -121,6 +116,15 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
         if (active) {
           if (data.items && Array.isArray(data.items)) {
             setProducts(data.items);
+            if (selectedBrand === "all") {
+              const bSet = new Set<string>();
+              data.items.forEach((p: Product) => {
+                if (p.brand && p.brand.trim()) {
+                  bSet.add(p.brand);
+                }
+              });
+              setAvailableBrands(Array.from(bSet).sort());
+            }
           } else {
             setProducts([]);
           }
@@ -203,7 +207,7 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
                 className="bg-transparent border-none outline-none text-[11px] sm:text-sm font-bold text-slate-800 cursor-pointer pr-1"
               >
                 <option value="all">{t.brandAll}</option>
-                {uniqueBrands.map(brand => (
+                {availableBrands.map(brand => (
                   <option key={brand} value={brand}>{brand}</option>
                 ))}
               </select>
