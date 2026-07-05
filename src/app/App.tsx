@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
-import { Send, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu, Download } from "lucide-react";
+import { Send, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu, Download, History } from "lucide-react";
 import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -949,6 +949,23 @@ export default function App() {
                         {user.role === "superadmin" ? "🛡️ Superadmin" : user.role === "sales" ? "💼 Sales" : `👤 ${user.role}`}
                       </span>
                     </div>
+
+                    <div className="border-t border-slate-100" />
+
+                    {/* Booking History Button */}
+                    <button
+                      onClick={() => {
+                        setIsProfileOpen(false);
+                        setActiveTab("chat");
+                        setTimeout(() => {
+                          handleSendMessage(lang === "id" ? "Tolong cek riwayat booking saya" : "Please check my booking history");
+                        }, 100);
+                      }}
+                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100/80 rounded-xl transition-all cursor-pointer text-center"
+                    >
+                      <History className="w-3.5 h-3.5 text-indigo-500" />
+                      {lang === "id" ? "Riwayat Booking" : "Booking History"}
+                    </button>
 
                     <div className="border-t border-slate-100" />
 
