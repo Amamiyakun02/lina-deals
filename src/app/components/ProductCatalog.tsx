@@ -106,6 +106,7 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
       const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
 
       const params = new URLSearchParams();
+      params.append("limit", "200");
       if (debouncedSearch.trim()) params.append("search", debouncedSearch.trim());
       if (selectedCategory !== "all") params.append("category", selectedCategory);
       if (selectedBrand !== "all") params.append("brand", selectedBrand);
