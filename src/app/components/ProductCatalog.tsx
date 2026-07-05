@@ -174,7 +174,7 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
     return () => {
       active = false;
     };
-  }, [debouncedSearch, selectedCategory, selectedBrand, sortBy]);
+  }, [debouncedSearch, selectedCategory, selectedBrand, sortBy, isActive]);
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-slate-50/30">
