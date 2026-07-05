@@ -175,9 +175,9 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-slate-50/30">
       {/* Search & Filter Header (Premium Minimalist panel) */}
-      <div className="p-4 sm:p-6 bg-white/70 border-b border-slate-200/60 backdrop-blur-md shrink-0 space-y-4">
+      <div className="p-2 sm:p-6 bg-white/70 border-b border-slate-200/60 backdrop-blur-md shrink-0 space-y-2 sm:space-y-4">
         {/* Row 1: Search & Sort */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           {/* Search bar */}
           <div className="relative flex-1 group">
             <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
@@ -188,19 +188,19 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t.searchPlaceholder}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100/50 focus:outline-none text-sm transition-all duration-300 text-slate-800 placeholder:text-slate-400 shadow-sm"
+              className="w-full pl-9 pr-3 py-1.5 sm:pl-10 sm:pr-4 sm:py-2.5 rounded-xl border border-slate-200 bg-white/80 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100/50 focus:outline-none text-sm transition-all duration-300 text-slate-800 placeholder:text-slate-400 shadow-sm"
             />
           </div>
 
           {/* Sorter */}
-          <div className="flex flex-wrap gap-2 shrink-0">
+          <div className="flex gap-1.5 sm:gap-2 shrink-0 overflow-x-auto no-scrollbar pb-1 sm:pb-0">
             {/* Brand Dropdown */}
-            <div className="relative flex items-center border border-slate-200 rounded-xl bg-white/80 px-3 py-2 text-slate-700 shadow-sm hover:border-slate-350 transition-colors">
-              <span className="text-xs font-bold text-slate-450 mr-2">{t.filterBrand}:</span>
+            <div className="relative flex items-center border border-slate-200 rounded-xl bg-white/80 px-2 py-1.5 sm:px-3 sm:py-2 text-slate-700 shadow-sm hover:border-slate-350 transition-colors shrink-0">
+              <span className="text-[11px] sm:text-xs font-bold text-slate-450 mr-1 sm:mr-2">{t.filterBrand}:</span>
               <select
                 value={selectedBrand}
                 onChange={(e) => setSelectedBrand(e.target.value)}
-                className="bg-transparent border-none outline-none text-xs sm:text-sm font-bold text-slate-800 cursor-pointer pr-1"
+                className="bg-transparent border-none outline-none text-[11px] sm:text-sm font-bold text-slate-800 cursor-pointer pr-1"
               >
                 <option value="all">{t.brandAll}</option>
                 {uniqueBrands.map(brand => (
@@ -210,12 +210,12 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
             </div>
 
             {/* Price Sort */}
-            <div className="relative flex items-center border border-slate-200 rounded-xl bg-white/80 px-3 py-2 text-slate-700 shadow-sm hover:border-slate-350 transition-colors">
-              <ArrowUpDown className="w-3.5 h-3.5 mr-2 text-slate-400" />
+            <div className="relative flex items-center border border-slate-200 rounded-xl bg-white/80 px-2 py-1.5 sm:px-3 sm:py-2 text-slate-700 shadow-sm hover:border-slate-350 transition-colors shrink-0">
+              <ArrowUpDown className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 sm:mr-2 text-slate-400" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-transparent border-none outline-none text-xs sm:text-sm font-bold text-slate-800 cursor-pointer pr-1"
+                className="bg-transparent border-none outline-none text-[11px] sm:text-sm font-bold text-slate-800 cursor-pointer pr-1"
               >
                 <option value="featured">Pilihan Utama</option>
                 <option value="price-asc">{t.priceLowHigh}</option>
@@ -226,12 +226,12 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
         </div>
 
         {/* Row 2: Category Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-          <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400 shrink-0 mr-1" />
+        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <SlidersHorizontal className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0 mr-0.5 sm:mr-1" />
           <button
             onClick={() => setSelectedCategory("all")}
             className={cn(
-              "px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 shrink-0 cursor-pointer border active:scale-95 hover:scale-105",
+              "px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all duration-300 shrink-0 cursor-pointer border active:scale-95 hover:scale-105",
               selectedCategory === "all"
                 ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200/50"
                 : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100/50 hover:text-slate-850 hover:border-slate-305"
@@ -242,7 +242,7 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
           <button
             onClick={() => setSelectedCategory("smartphone")}
             className={cn(
-              "px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 shrink-0 cursor-pointer border active:scale-95 hover:scale-105",
+              "px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all duration-300 shrink-0 cursor-pointer border active:scale-95 hover:scale-105",
               selectedCategory === "smartphone"
                 ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200/50"
                 : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100/50 hover:text-slate-855 hover:border-slate-305"
@@ -253,7 +253,7 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
           <button
             onClick={() => setSelectedCategory("accessories")}
             className={cn(
-              "px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-300 shrink-0 cursor-pointer border active:scale-95 hover:scale-105",
+              "px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all duration-300 shrink-0 cursor-pointer border active:scale-95 hover:scale-105",
               selectedCategory === "accessories"
                 ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-200/50"
                 : "bg-white text-slate-600 border-slate-200 hover:bg-slate-100/50 hover:text-slate-855 hover:border-slate-305"
@@ -265,9 +265,9 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
       </div>
 
       {/* Grid Content Area */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 sm:py-6">
+      <div className="flex-1 overflow-y-auto px-2 py-2 sm:px-6 sm:py-6">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 justify-items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6 justify-items-center">
             {[1, 2, 3, 4, 5, 6].map((item) => (
               <div
                 key={item}
@@ -298,7 +298,7 @@ export default function ProductCatalog({ lang, onProductAction, isActive = true 
               variants={containerVariants}
               initial="hidden"
               animate="show"
-              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 justify-items-center"
+              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6 justify-items-center"
             >
               {products.slice(0, visibleCount).map(product => (
                 <motion.div key={product.id} variants={itemVariants} className="w-full flex justify-center h-auto">

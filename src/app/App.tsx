@@ -823,14 +823,14 @@ export default function App() {
       <div className="relative z-10 w-full max-w-4xl h-screen flex flex-col backdrop-blur-3xl border-x shadow-2xl bg-white/60 border-slate-200/50 shadow-[0_0_40px_rgba(0,0,0,0.05)]">
 
         {/* IRIN Cellular Store Header */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between shrink-0 relative overflow-hidden border-b border-indigo-900/50">
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-3 py-2 sm:px-6 sm:py-4 flex items-center justify-between shrink-0 relative overflow-hidden border-b border-indigo-900/50">
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-400 via-transparent to-transparent"></div>
-          <div className="relative z-10 flex items-center gap-3 sm:gap-4">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.4)] flex items-center justify-center border border-indigo-400/50">
-              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <div className="relative z-10 flex items-center gap-2 sm:gap-4">
+            <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg sm:rounded-xl shadow-[0_0_20px_rgba(99,102,241,0.4)] flex items-center justify-center border border-indigo-400/50">
+              <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
             </div>
             <div className="flex flex-col">
-              <h1 className="text-white font-extrabold text-base sm:text-xl tracking-tight flex items-center gap-2">
+              <h1 className="text-white font-extrabold text-[13px] sm:text-xl tracking-tight flex items-center gap-2">
                 IRIN Cellular
                 <span className="bg-indigo-500/30 text-indigo-200 text-[10px] px-2 py-0.5 rounded-full border border-indigo-500/30 hidden sm:inline-flex shadow-sm">Official</span>
               </h1>
@@ -846,10 +846,10 @@ export default function App() {
         </div>
 
         {/* Agent Header */}
-        <header className="relative z-20 px-4 py-3 sm:px-6 sm:py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white/70 backdrop-blur-md">
+        <header className="relative z-20 px-3 py-2 sm:px-6 sm:py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white/70 backdrop-blur-md">
           {/* Brand */}
           <div className="flex items-center gap-2 sm:gap-4">
-            <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-50 border border-indigo-200 shadow-[0_0_15px_rgba(99,102,241,0.1)] overflow-hidden">
+            <div className="relative flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-50 border border-indigo-200 shadow-[0_0_15px_rgba(99,102,241,0.1)] overflow-hidden">
               <Avatar className="w-full h-full rounded-none">
                 <AvatarImage src="/images/Lina.png" className="object-cover" />
                 <AvatarFallback className="bg-transparent rounded-none">
@@ -975,13 +975,13 @@ export default function App() {
         </header>
 
         {/* Tab Navigation */}
-        <div className="px-4 py-2 border-b border-slate-200 bg-white/30 backdrop-blur-md shrink-0 flex gap-2">
+        <div className="px-2 py-1.5 sm:px-4 sm:py-2 border-b border-slate-200 bg-white/30 backdrop-blur-md shrink-0 flex gap-2">
           {/* iOS-Style Sliding Active Pill */}
           <div className="flex-1 flex relative bg-slate-100/70 p-1 rounded-2xl border border-slate-200/50">
             <button
               onClick={() => setActiveTab("chat")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold relative z-10 transition-colors duration-300 cursor-pointer focus:outline-none",
+                "flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 px-2 sm:py-2.5 sm:px-4 rounded-xl text-[11px] sm:text-sm font-bold relative z-10 transition-colors duration-300 cursor-pointer focus:outline-none",
                 activeTab === "chat" ? "text-white" : "text-slate-600 hover:text-slate-800"
               )}
             >
@@ -998,7 +998,7 @@ export default function App() {
             <button
               onClick={() => setActiveTab("catalog")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold relative z-10 transition-colors duration-300 cursor-pointer focus:outline-none",
+                "flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 px-2 sm:py-2.5 sm:px-4 rounded-xl text-[11px] sm:text-sm font-bold relative z-10 transition-colors duration-300 cursor-pointer focus:outline-none",
                 activeTab === "catalog" ? "text-white" : "text-slate-600 hover:text-slate-800"
               )}
             >
