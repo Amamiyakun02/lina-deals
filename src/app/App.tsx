@@ -817,6 +817,13 @@ export default function App() {
             background: "radial-gradient(circle at 50% 30%, rgba(99, 102, 241, 0.04) 0%, transparent 70%)"
           }}
         />
+
+        {/* CSS Aurora / Mesh Gradient (Hidden on Mobile) */}
+        <div className="hidden sm:block absolute inset-0 pointer-events-none opacity-40">
+          <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-indigo-400 mix-blend-multiply filter blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+          <div className="absolute top-[20%] -right-[10%] w-[40%] h-[50%] rounded-full bg-purple-400 mix-blend-multiply filter blur-[120px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '1s' }} />
+          <div className="absolute -bottom-[10%] left-[20%] w-[50%] h-[40%] rounded-full bg-blue-300 mix-blend-multiply filter blur-[120px] animate-pulse" style={{ animationDuration: '12s', animationDelay: '2s' }} />
+        </div>
       </div>
 
       {/* Main Chat App Container */}
