@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
 import { Send, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu, Download, History } from "lucide-react";
-import { useState, useRef, useEffect, lazy, Suspense } from "react";
+import { useState, useRef, useEffect, lazy, Suspense, useMemo } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
@@ -520,6 +520,33 @@ export default function App() {
   });
 
   const [messages, setMessages] = useState<Message[]>(() => [buildWelcomeMessage("id")]);
+
+  const pendingBookingProduct = useMemo(() => {
+    if (!user) return null;
+    let rejectedProduct: string | null = null;
+    let userAskedAgain = false;
+    
+    // Look backwards through messages
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const msg = messages[i];
+      if (msg.sender === "ai") {
+        const text = msg.text.toLowerCase();
+        if (text.includes("fitur booking") && (text.includes("login") || text.includes("masuk"))) {
+          const match = msg.text.match(/proses booking \**([^*]+?)\** dengan cepat/i) || msg.text.match(/proses booking (.*?) dengan cepat/i);
+          if (match && match[1]) {
+            rejectedProduct = match[1].trim();
+            break;
+          }
+        }
+      } else if (msg.sender === "user") {
+        if (msg.text.toLowerCase().includes("booking")) {
+          userAskedAgain = true;
+        }
+      }
+    }
+    
+    return userAskedAgain ? null : rejectedProduct;
+  }, [messages, user]);
 
   // Update welcome message when lang changes (only if it's the first/only message)
   useEffect(() => {
@@ -1132,6 +1159,23 @@ export default function App() {
 
                   <div ref={messagesEndRef} className="h-4" />
                 </div>
+
+                {/* Pending Booking Quick Prompt */}
+                {pendingBookingProduct && (
+                  <div className="px-3 sm:px-6 pb-2 pt-1 flex justify-center shrink-0">
+                    <motion.button
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      onClick={() => handleSendMessage(lang === "id" ? `Tolong lanjutkan proses booking untuk ${pendingBookingProduct}` : `Please resume booking process for ${pendingBookingProduct}`)}
+                      className="px-4 py-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-sm font-medium rounded-full shadow-sm transition-colors flex items-center gap-2 border border-indigo-200"
+                    >
+                      <Sparkles className="w-4 h-4 text-indigo-500" />
+                      {lang === "id" 
+                        ? `Lanjutkan booking ${pendingBookingProduct}` 
+                        : `Resume booking ${pendingBookingProduct}`}
+                    </motion.button>
+                  </div>
+                )}
 
                 {/* Input Area */}
                 <div className="px-3 sm:px-6 pb-2 pt-1 sm:pb-3 sm:pt-2 shrink-0 bg-gradient-to-t from-white/80 to-transparent">
