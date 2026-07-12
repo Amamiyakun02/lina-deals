@@ -641,8 +641,22 @@ export default function App() {
     }, 100);
   };
 
-  const handleResolveHITL = (messageId: number, result: { status: string; message: string }) => {
+  const handleResolveHITL = (messageId: number, result: { status: string; message: string; receipt?: string }) => {
     setMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, actionResult: result } : msg));
+    if (result.status === "executed" && result.receipt) {
+      const locale = lang === "id" ? "id-ID" : "en-US";
+      const aiResponseId = Date.now() + 1;
+      setMessages(prev => [...prev, {
+        id: aiResponseId,
+        sender: "ai",
+        text: result.receipt,
+        rawText: result.receipt,
+        timestamp: new Date().toLocaleTimeString(locale, {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      }]);
+    }
   };
 
   useEffect(() => {
@@ -1825,7 +1839,7 @@ function CustomerHITLCard({
 }: {
   action: PendingAction;
   result: { status: string; message: string } | null;
-  onResolve: (res: { status: string; message: string }) => void;
+  onResolve: (res: { status: string; message: string; receipt?: string }) => void;
   lang: string;
 }) {
   const [timeLeft, setTimeLeft] = useState(action.ttl_seconds);
@@ -1855,23 +1869,16 @@ function CustomerHITLCard({
       });
       if (response.ok) {
         const resData = await response.json();
-        let displayMessage = "";
-        if (decision === "approve") {
-          const bookingCode = resData.result?.data?.booking_code;
-          if (bookingCode) {
-            displayMessage = lang === "id"
-              ? `Booking berhasil diproses! Kode Booking Anda: ${bookingCode}`
-              : `Booking successfully processed! Your Booking Code: ${bookingCode}`;
-          } else {
-            displayMessage = resData.message || (lang === "id" ? "Booking berhasil dikonfirmasi oleh sistem (HITL)!" : "Booking successfully approved by system (HITL)!");
-          }
-        } else {
-          displayMessage = lang === "id" ? "Booking dibatalkan." : "Booking cancelled.";
-        }
+        const isBooking = action.tool_name === "buat_booking";
+        
+        const cardMessage = decision === "approve"
+          ? (lang === "id" ? "Booking berhasil dikonfirmasi oleh sistem (HITL)!" : "Booking successfully approved by system (HITL)!")
+          : (lang === "id" ? "Booking dibatalkan." : "Booking cancelled.");
 
         onResolve({
           status: decision === "approve" ? "executed" : "cancelled",
-          message: displayMessage
+          message: cardMessage,
+          receipt: (decision === "approve" && isBooking) ? resData.message : undefined
         });
       } else {
         const errData = await response.json();
