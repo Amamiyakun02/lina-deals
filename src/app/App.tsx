@@ -643,11 +643,6 @@ export default function App() {
 
   const handleResolveHITL = (messageId: number, result: { status: string; message: string }) => {
     setMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, actionResult: result } : msg));
-    if (result.status === "executed") {
-      handleSendMessage(lang === "id" ? "setuju" : "confirm");
-    } else {
-      handleSendMessage(lang === "id" ? "batal" : "cancel");
-    }
   };
 
   useEffect(() => {
@@ -1859,11 +1854,24 @@ function CustomerHITLCard({
         body: JSON.stringify({ action_id: action.action_id, decision })
       });
       if (response.ok) {
+        const resData = await response.json();
+        let displayMessage = "";
+        if (decision === "approve") {
+          const bookingCode = resData.result?.data?.booking_code;
+          if (bookingCode) {
+            displayMessage = lang === "id"
+              ? `Booking berhasil diproses! Kode Booking Anda: ${bookingCode}`
+              : `Booking successfully processed! Your Booking Code: ${bookingCode}`;
+          } else {
+            displayMessage = resData.message || (lang === "id" ? "Booking berhasil dikonfirmasi oleh sistem (HITL)!" : "Booking successfully approved by system (HITL)!");
+          }
+        } else {
+          displayMessage = lang === "id" ? "Booking dibatalkan." : "Booking cancelled.";
+        }
+
         onResolve({
           status: decision === "approve" ? "executed" : "cancelled",
-          message: decision === "approve" 
-            ? (lang === "id" ? "Booking berhasil dikonfirmasi oleh sistem (HITL)!" : "Booking successfully approved by system (HITL)!")
-            : (lang === "id" ? "Booking dibatalkan." : "Booking cancelled.")
+          message: displayMessage
         });
       } else {
         const errData = await response.json();
