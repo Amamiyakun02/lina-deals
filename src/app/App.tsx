@@ -757,12 +757,12 @@ export default function App() {
             }
           }
 
-          if (aiText.trim() !== "") {
+          if (aiText.trim() !== "" || currentConfirmation) {
             setIsLoading(false);
 
             const parsedProducts = parseProductsFromResponse(aiText);
             const isStreamingProducts = aiText.includes("[PRODUCTS:");
-            const cleanText = cleanTextFromProducts(aiText);
+            const cleanText = cleanTextFromProducts(aiText) || (currentConfirmation ? (lang === "id" ? "Memerlukan konfirmasi untuk melanjutkan:" : "Confirmation required to proceed:") : "");
 
             setMessages((prev) => {
               const exists = prev.some(msg => msg.id === aiResponseId);
@@ -788,8 +788,8 @@ export default function App() {
                   msg.id === aiResponseId
                     ? {
                       ...msg,
-                      text: cleanText,
-                      rawText: aiText,
+                      text: cleanText || msg.text,
+                      rawText: aiText || msg.rawText,
                       confirmationRequired: currentConfirmation || msg.confirmationRequired,
                       products: isOldFormatFinished ? parsedProducts : msg.products,
                       productsLoading: isOldFormatFinished ? false : (isLoadingProducts ? true : msg.productsLoading),
