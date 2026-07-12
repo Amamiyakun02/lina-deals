@@ -1992,7 +1992,7 @@ function ChatMessage({
   const renderMessageContent = (text: string): ReactNode => {
     const processFormatting = (content: string) => {
       const parts: React.ReactNode[] = [];
-      const linkRegex = /\[([\s\S]*?)\]\((https?:\/\/[^\)]+)\)/g;
+      const linkRegex = /\[([\s\S]*?)\]\(((?:https?:\/\/|quickprompt:)[^)]+)\)/g;
       let lastIndex = 0;
       let match: RegExpExecArray | null;
       let keyCounter = 0;
@@ -2025,41 +2025,59 @@ function ChatMessage({
 
         const linkText = match[1];
         const linkUrl = match[2];
-        const isDownload = linkText.toLowerCase().includes("download");
 
-        if (isDownload) {
+        if (linkUrl.startsWith("quickprompt:")) {
+          const promptText = decodeURIComponent(linkUrl.substring("quickprompt:".length));
           parts.push(
-            <a
+            <button
               key={`link-${keyCounter++}`}
-              href={linkUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={() => onSendMessage(promptText)}
               className={cn(
-                "inline-flex items-center gap-2 px-4 py-2.5 my-1 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all duration-300 active:scale-95 cursor-pointer shadow-md shadow-indigo-500/10 decoration-transparent",
+                "inline-flex items-center gap-1.5 px-3 py-1.5 my-1 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all duration-300 active:scale-95 cursor-pointer shadow-sm border decoration-transparent",
                 !isUser
-                  ? "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white border border-indigo-600/15"
-                  : "bg-white text-indigo-600 hover:bg-slate-50 border border-white"
+                  ? "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white border-indigo-600/15"
+                  : "bg-white text-indigo-600 hover:bg-slate-50 border-white"
               )}
             >
-              <Download className="w-3.5 h-3.5 shrink-0 animate-bounce" style={{ animationDuration: '2s' }} />
               <span>{linkText}</span>
-            </a>
+            </button>
           );
         } else {
-          parts.push(
-            <a
-              key={`link-${keyCounter++}`}
-              href={linkUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={cn(
-                "underline font-bold transition-all duration-200 hover:opacity-80",
-                !isUser ? "text-indigo-600 hover:text-indigo-700" : "text-white hover:text-slate-100"
-              )}
-            >
-              {linkText}
-            </a>
-          );
+          const isDownload = linkText.toLowerCase().includes("download");
+          if (isDownload) {
+            parts.push(
+              <a
+                key={`link-${keyCounter++}`}
+                href={linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  "inline-flex items-center gap-2 px-4 py-2.5 my-1 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all duration-300 active:scale-95 cursor-pointer shadow-md shadow-indigo-500/10 decoration-transparent",
+                  !isUser
+                    ? "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white border border-indigo-600/15"
+                    : "bg-white text-indigo-600 hover:bg-slate-50 border border-white"
+                )}
+              >
+                <Download className="w-3.5 h-3.5 shrink-0 animate-bounce" style={{ animationDuration: '2s' }} />
+                <span>{linkText}</span>
+              </a>
+            );
+          } else {
+            parts.push(
+              <a
+                key={`link-${keyCounter++}`}
+                href={linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  "underline font-bold transition-all duration-200 hover:opacity-80",
+                  !isUser ? "text-indigo-600 hover:text-indigo-700" : "text-white hover:text-slate-100"
+                )}
+              >
+                {linkText}
+              </a>
+            );
+          }
         }
 
         lastIndex = match.index + match[0].length;
