@@ -99,7 +99,7 @@ export default function ProductCard({
       whileHover={{ y: -6 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
       className={cn(
-        "relative flex flex-col w-full max-w-[280px] sm:max-w-[290px] shrink-0 rounded-2xl border overflow-hidden backdrop-blur-md transition-all duration-500 shadow-lg",
+        "relative flex flex-col w-full max-w-[280px] sm:max-w-[290px] shrink-0 rounded-2xl border overflow-hidden backdrop-blur-md transition-all duration-500 shadow-lg group",
         isAgent
           ? "bg-white/70 border-indigo-100 hover:border-indigo-300 hover:shadow-indigo-100/40"
           : "bg-slate-900/70 border-emerald-500/20 hover:border-emerald-500/40 hover:shadow-emerald-950/50"
@@ -134,16 +134,14 @@ export default function ProductCard({
       )}>
         {/* Glow behind image on hover */}
         <div className={cn(
-          "absolute w-28 h-28 sm:w-36 sm:h-36 rounded-full blur-3xl opacity-20 -z-10 transition-transform duration-500 scale-100 group-hover:scale-125",
+          "absolute w-28 h-28 sm:w-36 sm:h-36 rounded-full blur-2xl opacity-20 -z-10 transition-transform duration-500 scale-100 group-hover:scale-125",
           isAgent ? "bg-indigo-400" : "bg-emerald-400"
         )} />
         
-        <motion.img
-          whileHover={{ scale: 1.08 }}
-          transition={{ duration: 0.3 }}
+        <img
           src={product.image}
           alt={product.name}
-          className="h-[120px] sm:h-[150px] w-auto max-w-[90%] object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] filter"
+          className="h-[120px] sm:h-[150px] w-auto max-w-[90%] object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.15)] filter transition-transform duration-500 group-hover:scale-106"
         />
 
         {/* Color selectors overlay */}
