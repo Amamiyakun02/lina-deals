@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "./components/ui/avatar";
-import { Send, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu, Download, History } from "lucide-react";
+import { Send, Sparkles, Globe, HelpCircle, User, LogOut, ChevronRight, MessageSquare, ShoppingBag, Cpu, Download, History, RefreshCw } from "lucide-react";
 import { useState, useRef, useEffect, lazy, Suspense, useMemo } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -123,6 +123,36 @@ export function cleanTextFromProducts(text: string): string {
 
 export const parseProductsFromText = parseProductsFromResponse; // backward compat alias
 
+interface PendingAction {
+  action_id: string;
+  tool_name: string;
+  tool_args: Record<string, any>;
+  session_id: string;
+  admin_role: string;
+  risk_level: "critical" | "high" | "moderate";
+  summary: {
+    operation: string;
+    tool_name: string;
+    collection: string;
+    risk_level: string;
+    filter?: string;
+    hapus_semua?: boolean;
+    update?: string;
+    update_semua?: boolean;
+    dokumen?: string;
+    jumlah_dokumen?: number | string;
+    keyword?: string;
+    limit?: number;
+    platform?: string;
+    detail?: string;
+  };
+  affected_count: number;
+  created_at: string;
+  expires_at: string;
+  ttl_seconds: number;
+  status: string;
+}
+
 interface Message {
   id: number;
   sender: "user" | "ai";
@@ -132,6 +162,8 @@ interface Message {
   products?: Product[];
   productsLoading?: boolean;
   rawText?: string;
+  confirmationRequired?: PendingAction;
+  actionResult?: { status: string; message: string } | null;
 }
 
 interface UserProfile {
@@ -209,6 +241,9 @@ function buildFallbackPrompts(currentLang: Lang): QuickPrompt[] {
     },
   ];
 }
+
+const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
 
 export default function App() {
   // ─── Language State (persisted in localStorage) ──────────────────────────
@@ -299,8 +334,6 @@ export default function App() {
     setAuthError("");
     setAuthLoading(true);
 
-    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
     const endpoint = authMode === "login" ? `${baseUrl}/v1/auth/login` : `${baseUrl}/v1/auth/register`;
 
     try {
@@ -373,9 +406,6 @@ export default function App() {
     setAuthError("");
     setAuthLoading(true);
 
-    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
-
     // Safety timeout fallback
     const safetyTimeout = setTimeout(() => {
       setAuthLoading(false);
@@ -446,9 +476,6 @@ export default function App() {
     setCompleteProfileError("");
     setCompleteProfileLoading(true);
 
-    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
-
     try {
       if (!user) {
         throw new Error("Sesi pengguna tidak aktif.");
@@ -457,6 +484,26 @@ export default function App() {
       const phoneClean = completePhone.trim();
       if (!phoneClean) {
         throw new Error(lang === "id" ? "Nomor WhatsApp wajib diisi." : "WhatsApp number is required.");
+      }
+
+      if (!/^\+628\d{8,14}$/.test(phoneClean)) {
+        throw new Error(
+          lang === "id"
+            ? "Nomor WhatsApp harus diawali dengan +628 (pola Indonesia) dan berisi 9 hingga 15 digit angka (Contoh: +628123456789)."
+            : "WhatsApp number must start with +628 (Indonesian pattern) and contain 9 to 15 digits (Example: +628123456789)."
+        );
+      }
+
+      if (!completeName.trim()) {
+        throw new Error(lang === "id" ? "Nama lengkap wajib diisi." : "Full name is required.");
+      }
+
+      if (!completePassword.trim() || completePassword.trim().length < 6) {
+        throw new Error(
+          lang === "id"
+            ? "Kata sandi wajib diisi dan terdiri dari minimal 6 karakter."
+            : "Password is required and must be at least 6 characters long."
+        );
       }
 
       const response = await fetch(`${baseUrl}/v1/auth/update-profile`, {
@@ -498,8 +545,6 @@ export default function App() {
     // Immediately set to fallback prompts for optimal UI responsiveness
     setQuickPrompts(buildFallbackPrompts(lang));
 
-    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
     fetch(`${baseUrl}/v1/agent/quick-prompts?lang=${lang}`)
       .then(res => res.ok ? res.json() : Promise.reject(res.status))
       .then(data => {
@@ -596,6 +641,15 @@ export default function App() {
     }, 100);
   };
 
+  const handleResolveHITL = (messageId: number, result: { status: string; message: string }) => {
+    setMessages(prev => prev.map(msg => msg.id === messageId ? { ...msg, actionResult: result } : msg));
+    if (result.status === "executed") {
+      handleSendMessage(lang === "id" ? "setuju" : "confirm");
+    } else {
+      handleSendMessage(lang === "id" ? "batal" : "cancel");
+    }
+  };
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
@@ -633,8 +687,6 @@ export default function App() {
     }
 
     try {
-      const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-      const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
       const endpoint = `${baseUrl}/v1/agent/chat`;
 
       const token = localStorage.getItem("irin-auth-token");
@@ -671,6 +723,7 @@ export default function App() {
 
       const aiResponseId = Date.now() + 1;
       let aiText = "";
+      let currentConfirmation: PendingAction | undefined = undefined;
 
       if (reader) {
         while (true) {
@@ -689,6 +742,8 @@ export default function App() {
                 const data = JSON.parse(dataStr);
                 if (data.text) {
                   aiText += data.text;
+                } else if (data.confirmation_required) {
+                  currentConfirmation = data.confirmation_required;
                 } else if (data.error) {
                   console.error("Stream Error:", data.error);
                 } else if (typeof data === "string") {
@@ -720,6 +775,7 @@ export default function App() {
                   sender: "ai",
                   text: cleanText,
                   rawText: aiText,
+                  confirmationRequired: currentConfirmation,
                   products: isOldFormatFinished ? parsedProducts : undefined,
                   productsLoading: isLoadingProducts ? true : undefined,
                   timestamp: new Date().toLocaleTimeString(locale, {
@@ -734,6 +790,7 @@ export default function App() {
                       ...msg,
                       text: cleanText,
                       rawText: aiText,
+                      confirmationRequired: currentConfirmation || msg.confirmationRequired,
                       products: isOldFormatFinished ? parsedProducts : msg.products,
                       productsLoading: isOldFormatFinished ? false : (isLoadingProducts ? true : msg.productsLoading),
                     }
@@ -760,9 +817,6 @@ export default function App() {
           );
 
           try {
-            const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-            const baseUrl = isLocal ? "http://localhost:8000" : "https://linaagent.fastapicloud.dev";
-
             const batchResponse = await fetch(`${baseUrl}/v1/products/batch?ids=${productIds.join(",")}`);
             if (batchResponse.ok) {
               const data = await batchResponse.json();
@@ -1088,6 +1142,8 @@ export default function App() {
                       message={message}
                       lang={lang}
                       onAction={handleProductAction}
+                      onSendMessage={handleSendMessage}
+                      onResolveHITL={handleResolveHITL}
                       user={user}
                     />
                   ))}
@@ -1470,14 +1526,33 @@ export default function App() {
                 <label className="text-xs font-bold text-slate-600">
                   {lang === "id" ? "Nomor WhatsApp Aktif" : "Active WhatsApp Number"}
                 </label>
-                <input
-                  type="tel"
-                  required
-                  value={completePhone}
-                  onChange={(e) => setCompletePhone(e.target.value)}
-                  className="w-full h-11 px-4 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
-                  placeholder="e.g. 08123456789"
-                />
+                <div className="flex items-center gap-0 w-full">
+                  <span className="bg-slate-100 border border-slate-200 border-r-0 rounded-l-xl px-4 h-11 flex items-center text-sm text-slate-500 font-bold select-none">
+                    +62
+                  </span>
+                  <input
+                    type="text"
+                    required
+                    value={(() => {
+                      let clean = completePhone.trim();
+                      if (clean.startsWith("+62")) return clean.substring(3);
+                      if (clean.startsWith("62")) return clean.substring(2);
+                      if (clean.startsWith("0")) return clean.substring(1);
+                      return clean;
+                    })()}
+                    onChange={(e) => {
+                      const cleanVal = e.target.value.replace(/[^0-9]/g, "");
+                      setCompletePhone(cleanVal ? `+62${cleanVal}` : "");
+                    }}
+                    onKeyDown={(e) => {
+                      if (["e", "E", "+", "-", ".", ","].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="flex-1 h-11 px-4 rounded-r-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-indigo-400 focus:outline-none text-sm text-slate-800 transition-all duration-200 shadow-sm"
+                    placeholder="8123456789"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -1747,15 +1822,142 @@ export default function App() {
   );
 }
 
+function CustomerHITLCard({
+  action,
+  result,
+  onResolve,
+  lang
+}: {
+  action: PendingAction;
+  result: { status: string; message: string } | null;
+  onResolve: (res: { status: string; message: string }) => void;
+  lang: string;
+}) {
+  const [timeLeft, setTimeLeft] = useState(action.ttl_seconds);
+  const [isExpired, setIsExpired] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    const expiresAt = new Date(action.expires_at).getTime();
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        setIsExpired(true);
+        clearInterval(interval);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [action.expires_at]);
+
+  const handleDecision = async (decision: "approve" | "reject") => {
+    setIsProcessing(true);
+    try {
+      const response = await fetch(`${baseUrl}/v1/admin/confirm-action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action_id: action.action_id, decision })
+      });
+      if (response.ok) {
+        onResolve({
+          status: decision === "approve" ? "executed" : "cancelled",
+          message: decision === "approve" 
+            ? (lang === "id" ? "Booking berhasil dikonfirmasi oleh sistem (HITL)!" : "Booking successfully approved by system (HITL)!")
+            : (lang === "id" ? "Booking dibatalkan." : "Booking cancelled.")
+        });
+      } else {
+        const errData = await response.json();
+        alert(errData.detail || "Gagal memproses aksi.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error memproses aksi.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  if (result) {
+    const isSuccess = result.status === "executed";
+    return (
+      <div className={`mt-3 p-4 rounded-2xl border-2 transition-all duration-500 no-prose ${
+        isSuccess ? "border-emerald-200 bg-emerald-50/80 text-emerald-800" : "border-slate-200 bg-slate-50/80 text-slate-600"
+      }`}>
+        <div className="flex items-center gap-2 mb-1.5 font-bold text-xs uppercase tracking-wider">
+          {isSuccess ? "✅ Booking Terkonfirmasi" : "❌ Booking Dibatalkan"}
+        </div>
+        <p className="text-xs leading-relaxed opacity-90">{result.message}</p>
+      </div>
+    );
+  }
+
+  if (isExpired) {
+    return (
+      <div className="mt-3 p-4 rounded-2xl border-2 border-red-100 bg-red-50/50 text-red-700 text-xs no-prose">
+        ⏰ {lang === "id" ? "Batas waktu konfirmasi (HITL) telah habis." : "Confirmation time window has expired."}
+      </div>
+    );
+  }
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  return (
+    <div className="mt-3 rounded-2xl border-2 border-indigo-100 bg-indigo-50/30 overflow-hidden shadow-md no-prose">
+      <div className="px-4 py-2.5 bg-indigo-100/50 border-b border-indigo-100 flex items-center justify-between text-xs">
+        <span className="font-bold text-indigo-950 uppercase tracking-wider flex items-center gap-1.5">
+          🔑 {lang === "id" ? "Konfirmasi Diperlukan" : "Confirmation Required"}
+        </span>
+        <span className="font-mono text-indigo-700 flex items-center gap-1">
+          ⏱️ {formatTime(timeLeft)}
+        </span>
+      </div>
+      <div className="p-4 space-y-3">
+        <div className="text-xs text-indigo-950 font-medium">
+          {lang === "id" 
+            ? "Apakah Anda ingin melanjutkan konfirmasi pemesanan ini?" 
+            : "Do you want to confirm this booking reservation?"}
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleDecision("reject")}
+            disabled={isProcessing}
+            className="flex-1 py-2 text-xs font-bold rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+          >
+            {lang === "id" ? "Batalkan" : "Cancel"}
+          </button>
+          <button
+            onClick={() => handleDecision("approve")}
+            disabled={isProcessing}
+            className="flex-1 py-2 text-xs font-bold rounded-xl text-white bg-indigo-600 hover:bg-indigo-700 transition-all active:scale-95 cursor-pointer disabled:opacity-50 shadow-md shadow-indigo-200 flex items-center justify-center gap-1"
+          >
+            {isProcessing ? (
+              <RefreshCw size={12} className="animate-spin" />
+            ) : "👍"}
+            {isProcessing ? (lang === "id" ? "Memproses..." : "Processing...") : (lang === "id" ? "Konfirmasi" : "Confirm")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ChatMessage({
   message,
   lang,
   onAction,
+  onSendMessage,
+  onResolveHITL,
   user,
 }: {
   message: Message;
   lang: Lang;
   onAction: (action: "check_stock" | "view_specs" | "booking", product: Product) => void;
+  onSendMessage: (text: string) => void;
+  onResolveHITL: (messageId: number, result: { status: string; message: string }) => void;
   user?: UserProfile | null;
 }) {
   const isUser = message.sender === "user";
@@ -2041,6 +2243,35 @@ function ChatMessage({
           <div className={`prose prose-p:leading-relaxed max-w-none text-sm sm:text-[15px] ${!isUser ? "prose-slate text-slate-700" : "prose-invert text-white/95"}`}>
             {renderSearchingIndicator()}
             {renderMessageContent(message.text)}
+            {message.confirmationRequired && (
+              <CustomerHITLCard
+                action={message.confirmationRequired}
+                result={message.actionResult ?? null}
+                lang={lang}
+                onResolve={(res) => onResolveHITL(message.id, res)}
+              />
+            )}
+            {(() => {
+              if (isUser) return null;
+              if (message.confirmationRequired) return null;
+              const bkMatch = message.text.match(/BK-\d{8}-[A-Z0-9]{4}/i);
+              if (!bkMatch) return null;
+              const bookingCode = bkMatch[0];
+              return (
+                <div className="mt-3 pt-3 border-t border-slate-100/50 flex flex-wrap gap-2 no-prose">
+                  <button
+                    onClick={() => onSendMessage(
+                      lang === "id"
+                        ? `Tolong bantu hubungi admin untuk verifikasi manual booking ${bookingCode} (Human in the Loop)`
+                        : `Please contact admin for manual verification of booking ${bookingCode} (Human in the Loop)`
+                    )}
+                    className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer border border-indigo-100"
+                  >
+                    🤝 {lang === "id" ? "Minta Verifikasi Manual (HITL)" : "Request Manual Review (HITL)"}
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         </div>
 
