@@ -1872,7 +1872,7 @@ function CustomerHITLCard({
         const isBooking = action.tool_name === "buat_booking";
         
         const cardMessage = decision === "approve"
-          ? (lang === "id" ? "Booking berhasil dikonfirmasi oleh sistem (HITL)!" : "Booking successfully approved by system (HITL)!")
+          ? (lang === "id" ? "Booking berhasil dikonfirmasi oleh sistem!" : "Booking successfully approved by system!")
           : (lang === "id" ? "Booking dibatalkan." : "Booking cancelled.");
 
         onResolve({
@@ -1909,7 +1909,7 @@ function CustomerHITLCard({
   if (isExpired) {
     return (
       <div className="mt-3 p-4 rounded-2xl border-2 border-red-100 bg-red-50/50 text-red-700 text-xs no-prose">
-        ⏰ {lang === "id" ? "Batas waktu konfirmasi (HITL) telah habis." : "Confirmation time window has expired."}
+        ⏰ {lang === "id" ? "Batas waktu konfirmasi telah habis." : "Confirmation time window has expired."}
       </div>
     );
   }
@@ -2295,12 +2295,12 @@ function ChatMessage({
                   <button
                     onClick={() => onSendMessage(
                       lang === "id"
-                        ? `Tolong bantu hubungi admin untuk verifikasi manual booking ${bookingCode} (Human in the Loop)`
-                        : `Please contact admin for manual verification of booking ${bookingCode} (Human in the Loop)`
+                        ? `Tolong hubungkan saya dengan admin toko untuk bantuan booking ${bookingCode}`
+                        : `Please connect me with the store admin for help with booking ${bookingCode}`
                     )}
                     className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-all duration-300 active:scale-95 cursor-pointer border border-indigo-100"
                   >
-                    🤝 {lang === "id" ? "Minta Verifikasi Manual (HITL)" : "Request Manual Review (HITL)"}
+                    🤝 {lang === "id" ? "Minta Bantuan Admin" : "Request Admin Help"}
                   </button>
                 </div>
               );
